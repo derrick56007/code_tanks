@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:code_tanks/code_tanks_server.dart';
+import 'package:code_tanks/code_tanks_common.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -22,12 +22,26 @@ void main() {
       });
 
       socket.send('code_upload', {
+        'name': 'DoNothingTank',
         'language': 'en',
         'code_language': 'dart',
         'code': '''
-main() {
-  print("derp");
+import 'code_tanks_api.dart';
+
+class Custom extends BaseTank {
+  @override
+  void onDetectRobot(DetectRobotEvent e) {
+    // TODO: implement onDetectRobot
+  }
+
+  @override
+  void tick() {
+    // TODO: implement tick
+  }
+  
 }
+
+BaseTank createTank() => Custom();
 '''
       });
     });

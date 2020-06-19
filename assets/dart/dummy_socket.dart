@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:code_tanks/code_tanks_common.dart';
+import 'common_websocket.dart';
 
-class DummySocket extends CommonWebSocket{
+class DummySocket extends CommonWebSocket {
   final String url;
   WebSocket socket;
 

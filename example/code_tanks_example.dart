@@ -7,7 +7,7 @@ void main() {
   // print('awesome: ${awesome.isAwesome}');
 }
 
-class MyRobot extends Robot {
+class MyRobot extends BaseTank {
   @override
   void onDetectRobot(DetectRobotEvent e) {
     // TODO: implement onDetectRobot

@@ -1,8 +1,15 @@
+DockerFile
+CHANGELOG.md
+README.md
 temp/
+test/
 
 # Files and directories created by pub
 .dart_tool/
 .packages
+temp/
+tmp/
+test_temp/
 
 # Omit commiting pubspec.lock for library packages:
 # https://dart.dev/guides/libraries/private-files#pubspeclock

@@ -13,7 +13,7 @@ class ServerWebSocket extends CommonWebSocket {
   @override
   void send(String type, [message]) {
     if (message == null) {
-      _webSocket.add(type);
+      _webSocket.add(jsonEncode(type));
 
       return;
     }

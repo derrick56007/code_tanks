@@ -1,4 +1,4 @@
-abstract class Robot {
+abstract class BaseTank {
   void tick();
   void onDetectRobot(DetectRobotEvent e);
 }

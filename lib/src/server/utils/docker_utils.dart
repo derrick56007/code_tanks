@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:code_tanks/src/server/server_websocket.dart';
-import 'package:code_tanks/src/server/utils.dart';
+import 'package:code_tanks/src/server/utils/server_websocket.dart';
+import 'package:code_tanks/src/server/utils/utils.dart';
 import 'package:path/path.dart' as path;
 
 class DockerUtils {
@@ -14,7 +14,8 @@ class DockerUtils {
     'python': '.py'
   };
 
-  static Future build(String fp, String uuid, ServerWebSocket socket) async {
+  static Future<int> build(String fp, String uuid,
+      [ServerWebSocket socket]) async {
     //     Process.start('ls', [], runInShell: true).then((Process process) {
     //   process.stdout
     //       .transform(utf8.decoder)
@@ -27,10 +28,9 @@ class DockerUtils {
     final dockerFilePath = path.join(fp, 'Dockerfile');
 
     // docker tag must be lowercase
-
-    final process = await Process.start(
-        'docker', ['build', '-f', dockerFilePath, '-t', uuid, fp],
-        runInShell: true);
+    final args = ['build', '-f', dockerFilePath, '-t', uuid, fp];
+    print('running docker build with args: $args');
+    final process = await Process.start('docker', args, runInShell: true);
 
     final lineStream = process.stdout
         .transform(DockerUtils.utf8Decoder)
@@ -40,7 +40,7 @@ class DockerUtils {
     final logFile = await File(logPath).create(recursive: true);
 
     await for (final line in lineStream) {
-      socket.send('build_log_part', line);
+      socket?.send('build_log_part', line);
       await logFile.writeAsString(line + '\n', mode: FileMode.append);
     }
 
@@ -48,6 +48,8 @@ class DockerUtils {
     // print('exit code: ${await process.exitCode}');
     final exitCode = await process.exitCode;
     print('built $uuid with exit code $exitCode');
+
+    return exitCode;
   }
 
   static Future copyDockerFiles(String fp, String codeLanguage) async {
@@ -61,6 +63,9 @@ class DockerUtils {
     final ext = fileExtensions[codeLanguage];
 
     final p = path.joinAll([fp, 'custom$ext']);
+
+    // first delete temp file
+    await File(p).delete();
     final file = await File(p).create(recursive: true);
     await file.writeAsString(code);
   }
