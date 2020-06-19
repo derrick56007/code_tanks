@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:code_tanks/code_tanks_common.dart';
-import 'package:code_tanks/src/server/utils/server_websocket.dart';
+import '../../../code_tanks_server_common.dart';
+import '../authentication_server/authentication_database.dart';
 
 class AuthenticationServer {
   final String address;
@@ -15,6 +15,8 @@ class AuthenticationServer {
 
   final gameServerSockets = <String, ServerWebSocket>{};
   final buildServerSockets = <String, ServerWebSocket>{};
+
+  final authenticationDatabase = AuthenticationDatabase();
 
   AuthenticationServer(
       this.address, this.port, this.gameServerAddresses, this.buildServerAddresses) {
@@ -29,6 +31,8 @@ class AuthenticationServer {
     sub = server.listen(onRequest);
 
     print('auth server started at $address:$port');
+
+    await authenticationDatabase.init();
   }
 
   void onRequest(HttpRequest req) async {

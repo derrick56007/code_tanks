@@ -1,19 +1,14 @@
-FROM google/dart:2.8 AS dart-runtime
-
-RUN apt-get update
+FROM derrick56007/dart_dind
 
 WORKDIR /code_tanks
-COPY . /code_tanks
-
+COPY pubspec.* /code_tanks
 RUN pub get
 
-RUN dart2native /code_tanks/bin/run_game_server.dart -o /code_tanks/run
+COPY . /code_tanks
+RUN rm -rf /code_tanks/assets
 
-FROM frolvlad/alpine-glibc:alpine-3.11_glibc-2.31
+RUN pub get --offline
 
-COPY --from=dart-runtime /code_tanks/run /code_tanks/run
+RUN chmod 777 /code_tanks/bin/run_game_server.dart
 
-RUN chmod 777 /code_tanks/run
-
-CMD []
-ENTRYPOINT ["/code_tanks/run"]
+ENTRYPOINT ["/usr/bin/dart", "/code_tanks/bin/run_game_server.dart"]

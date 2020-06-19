@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:code_tanks/code_tanks_common.dart';
+import '../../../code_tanks_common.dart';
 
 class DummySocket extends CommonWebSocket {
   final String url;

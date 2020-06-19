@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:code_tanks/src/common/common_websocket.dart';
+import '../../common/common_websocket.dart';
 
 class ServerWebSocket extends CommonWebSocket {
   final HttpRequest _req;

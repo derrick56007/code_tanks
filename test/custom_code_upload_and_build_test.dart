@@ -1,6 +1,4 @@
-import 'dart:io';
-
-import 'package:code_tanks/code_tanks_common.dart';
+import 'package:code_tanks/code_tanks_server_common.dart';
 import 'package:test/test.dart';
 
 void main() {

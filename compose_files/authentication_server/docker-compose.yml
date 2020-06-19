@@ -1,0 +1,20 @@
+version: "3.8"
+services:
+  code_tanks_authentication_server:
+    container_name: code_tanks_authentication_server
+    build:
+      context: ../../
+      dockerfile: DockerfileAuthenticationServer
+    ports: 
+      - 9897:9897
+    environment: 
+      - GAME_SERVER_URLS=172.22.0.1
+      - BUILD_SERVER_URLS=172.22.0.1
+      - PORT=9897
+    depends_on: 
+      - redis
+    command: ["/code_tanks/wait-for-it.sh", "redis:6379", "--", "/usr/bin/dart", "/code_tanks/bin/run_authentication_server.dart"]
+
+  redis:
+    image: redis:6.0.5
+    container_name: code_tanks_authentication_server_redis

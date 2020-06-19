@@ -3,6 +3,12 @@ CHANGELOG.md
 README.md
 temp/
 test/
+analysis_options.yaml
+compose_files/
+DockerFileAuthenticationServer
+DockerFileBuildServer
+DockerFileGameServer
+example/
 
 # Files and directories created by pub
 .dart_tool/

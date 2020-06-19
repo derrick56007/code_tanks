@@ -1,6 +1,6 @@
 library prebuilt_tanks;
 
-import 'package:code_tanks/src/server/game/pre_defined_tanks/src/do_nothing_tank.dart'
+import 'src/do_nothing_tank.dart'
     as do_nothing_tank;
 
 class PreDefinedTanks {

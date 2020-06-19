@@ -1,27 +1,18 @@
-FROM ubuntu:20.04
-
-ARG DEBIAN_FRONTEND=noninteractive
-
-RUN \
-  apt-get -q update && apt-get install --no-install-recommends -y -q gnupg2 curl git ca-certificates apt-transport-https openssh-client && \
-  curl https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-  curl https://storage.googleapis.com/download.dartlang.org/linux/debian/dart_stable.list > /etc/apt/sources.list.d/dart_stable.list && \
-  curl -fsSL https://get.docker.com -o get-docker.sh && \
-  sh get-docker.sh && \
-  apt-get -q update && \
-  apt-get install -y -q dart && \
-  rm -rf /var/lib/apt/lists/*
-
-ENV DART_SDK /usr/lib/dart
-ENV PATH $DART_SDK/bin:/root/.pub-cache/bin:$PATH
+FROM derrick56007/dart_dind
 
 WORKDIR /code_tanks
-COPY . /code_tanks
 
+RUN curl -fsSL https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh -o wait-for-it.sh
+RUN chmod 777 /code_tanks/wait-for-it.sh
+
+COPY pubspec.* /code_tanks
 RUN pub get
+
+COPY . /code_tanks
+RUN pub get --offline
 
 RUN chmod 777 /code_tanks/bin/run_build_server.dart
 
-ENTRYPOINT ["/usr/bin/dart", "/code_tanks/bin/run_build_server.dart"]
+# ENTRYPOINT ["/usr/bin/dart", "/code_tanks/bin/run_build_server.dart"]
 
 

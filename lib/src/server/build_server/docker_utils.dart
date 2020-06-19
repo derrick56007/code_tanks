@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:code_tanks/src/server/utils/server_websocket.dart';
-import 'package:code_tanks/src/server/utils/utils.dart';
+import '../server_common/server_websocket.dart';
+import '../server_utils/utils.dart';
 import 'package:path/path.dart' as path;
 
 class DockerUtils {

@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:code_tanks/code_tanks_common.dart';
-import 'package:code_tanks/src/server/utils/server_websocket.dart';
+import '../../../code_tanks_server_common.dart';
 
 class GameServer {
   final String address;
@@ -26,6 +25,7 @@ class GameServer {
     await authenticationSocket.start();
     print('connected to authentication server $authenticationServerUrl');
     authenticationSocket.send('game_server_handshake');
+    print('sent handshake');
   }
 
   void onRequest(HttpRequest req) async {
