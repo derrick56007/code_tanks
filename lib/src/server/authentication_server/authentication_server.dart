@@ -18,8 +18,8 @@ class AuthenticationServer {
 
   final authenticationDatabase = AuthenticationDatabase();
 
-  AuthenticationServer(
-      this.address, this.port, this.gameServerAddresses, this.buildServerAddresses) {
+  AuthenticationServer(this.address, this.port, this.gameServerAddresses,
+      this.buildServerAddresses) {
     print('game server urls: $gameServerAddresses');
     print('build server urls: $buildServerAddresses');
   }
@@ -87,6 +87,12 @@ class AuthenticationServer {
         buildServerSockets[address] = socket;
         print('build server handshake success');
       })
+      ..on('webserver_handshake', () {
+        final address = req.connectionInfo.remoteAddress.address;
+
+        print('handshake from web server $address');
+        print('web server handshake success');
+      })
       ..on('register', (data) => onRegister(socket, data))
       ..on('login', (data) => onLogin(socket, data))
       ..on('logout', () => onLogout(socket));
@@ -111,7 +117,6 @@ class AuthenticationServer {
   Future<void> onRegister(ServerWebSocket socket, data) async {
     await onLogout(socket);
 
-
     if (!(data is Map)) {
       print('incorrect data type for registering');
       return;
@@ -120,7 +125,7 @@ class AuthenticationServer {
     final username = '${data["username"]}';
     final password = '${data["password"]}';
 
-    if (username == null || 
+    if (username == null ||
         username.trim().isEmpty ||
         username.toLowerCase() == 'null') {
       print('invalid username/password');
@@ -128,20 +133,20 @@ class AuthenticationServer {
     }
 
     // search for username
-    await authenticationDatabase.send_object(['HGET', 'users', username]);
+    final searchResult =
+        await authenticationDatabase.send_object(['HGET', 'users', username]);
+
+    print(searchResult);
 
     if (password == null ||
         password.trim().isEmpty ||
         password.toLowerCase() == 'null') {
-          print('invalid username/password');
-          return;
-        }
+      print('invalid username/password');
+      return;
+    }
   }
 
-  Future<void> onLogin(ServerWebSocket socket, data) async {
+  Future<void> onLogin(ServerWebSocket socket, data) async {}
 
-  }
-
-  Future<void> onLogout(ServerWebSocket socket) async {
-  }
+  Future<void> onLogout(ServerWebSocket socket) async {}
 }
