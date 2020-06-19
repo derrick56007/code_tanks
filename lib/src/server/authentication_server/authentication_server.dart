@@ -87,8 +87,9 @@ class AuthenticationServer {
         buildServerSockets[address] = socket;
         print('build server handshake success');
       })
-      ..on('register', onRegister)
-      ..on('login', onLogin);
+      ..on('register', (data) => onRegister(socket, data))
+      ..on('login', (data) => onLogin(socket, data))
+      ..on('logout', () => onLogout(socket));
   }
 
   void handleSocketDone(ServerWebSocket socket) {
@@ -107,7 +108,40 @@ class AuthenticationServer {
     print('authentication server closed at $address:$port');
   }
 
-  void onRegister(data) {}
+  Future<void> onRegister(ServerWebSocket socket, data) async {
+    await onLogout(socket);
 
-  void onLogin(data) {}
+
+    if (!(data is Map)) {
+      print('incorrect data type for registering');
+      return;
+    }
+
+    final username = '${data["username"]}';
+    final password = '${data["password"]}';
+
+    if (username == null || 
+        username.trim().isEmpty ||
+        username.toLowerCase() == 'null') {
+      print('invalid username/password');
+      return;
+    }
+
+    // search for username
+    await authenticationDatabase.send_object(['HGET', 'users', username]);
+
+    if (password == null ||
+        password.trim().isEmpty ||
+        password.toLowerCase() == 'null') {
+          print('invalid username/password');
+          return;
+        }
+  }
+
+  Future<void> onLogin(ServerWebSocket socket, data) async {
+
+  }
+
+  Future<void> onLogout(ServerWebSocket socket) async {
+  }
 }

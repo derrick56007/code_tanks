@@ -4,7 +4,7 @@ README.md
 temp/
 test/
 analysis_options.yaml
-compose_files/
+docker/
 DockerFileAuthenticationServer
 DockerFileBuildServer
 DockerFileGameServer

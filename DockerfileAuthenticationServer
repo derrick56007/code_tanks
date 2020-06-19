@@ -11,6 +11,8 @@ COPY pubspec.* /code_tanks
 RUN pub get
 
 COPY . /code_tanks
+RUN rm -rf /code_tanks/website
+
 RUN pub get --offline
 
 # RUN dart2native /code_tanks/bin/run_authentication_server.dart -o /code_tanks/run

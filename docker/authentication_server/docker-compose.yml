@@ -16,5 +16,13 @@ services:
     command: ["/code_tanks/wait-for-it.sh", "redis:6379", "--", "/usr/bin/dart", "/code_tanks/bin/run_authentication_server.dart"]
 
   redis:
-    image: redis:6.0.5
+    build: 
+      context: ./redis
+      dockerfile: Dockerfile
     container_name: code_tanks_authentication_server_redis
+    volumes: 
+      - ./redis_config/redis.conf:/usr/local/etc/redis/redis.conf
+    # command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    entrypoint:
+      - /bin/sh
+      - entrypoint.sh

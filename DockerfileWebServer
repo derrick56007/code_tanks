@@ -1,0 +1,28 @@
+FROM derrick56007/dart_dind
+
+RUN pub global activate webdev
+
+WORKDIR /code_tanks
+COPY pubspec.* /code_tanks
+RUN pub get
+
+COPY . /code_tanks
+RUN rm -rf /code_tanks/assets
+RUN rm -rf /code_tanks/website
+RUN pub get --offline
+
+WORKDIR /website
+COPY website/pubspec.* /website/
+RUN pub get
+COPY website/. /website/
+RUN pub get --offline
+
+RUN ls
+
+# RUN chmod 777 /code_tanks/bin/run_web_server.dart
+
+RUN webdev build --release --output web:build
+
+# ENTRYPOINT ["/usr/bin/dart", "/code_tanks/bin/run_web_server.dart"]
+
+ENTRYPOINT ["/bin/bash"]

@@ -9,6 +9,8 @@ COPY pubspec.* /code_tanks
 RUN pub get
 
 COPY . /code_tanks
+RUN rm -rf /code_tanks/website
+
 RUN pub get --offline
 
 RUN chmod 777 /code_tanks/bin/run_build_server.dart
