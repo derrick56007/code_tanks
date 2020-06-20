@@ -10,8 +10,17 @@ void main() async {
       ? int.parse(Platform.environment['PORT'])
       : defaultPort;
 
-  final authenticationServerUrl = Platform.environment['AUTHENTICATION_SERVER_URL'];
+  final authenticationServerAddress =
+      Platform.environment.containsKey('AUTHENTICATION_SERVER_ADDRESS')
+          ? Platform.environment['AUTHENTICATION_SERVER_ADDRESS']
+          : '127.0.0.1';
 
-  final webServer = WebServer(address, port, authenticationServerUrl);
+  final authenticationServerPort =
+      Platform.environment.containsKey('AUTHENTICATION_SERVER_PORT')
+          ? int.parse(Platform.environment['AUTHENTICATION_SERVER_PORT'])
+          : 9897;
+          
+  final webServer = WebServer(
+      address, port, authenticationServerAddress, authenticationServerPort);
   await webServer.init();
 }

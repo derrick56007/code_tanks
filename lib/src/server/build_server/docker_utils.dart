@@ -81,4 +81,45 @@ class DockerUtils {
 
     return uuid;
   }
+
+  static Future<int> saveToRegistry(String fp, String uuid,
+      [ServerWebSocket socket]) async {
+    const registryAddress = 'localhost';
+    const registryPort = 5000;
+
+    final newTag = '$registryAddress:$registryPort/$uuid';
+    final tagArgs = ['tag', uuid, newTag];
+
+    final tagProcess = await Process.start('docker', tagArgs, runInShell: true);
+    print('running tag push with args: $tagArgs');
+    final tagExitCode = await tagProcess.stderr.drain();
+
+    if (tagExitCode != null) {
+      print('error tagging $tagExitCode');
+      return tagExitCode;
+    }
+
+    final args = ['push', newTag];
+    print('running docker push with args: $args');
+    final process = await Process.start('docker', args, runInShell: true);
+
+    final lineStream = process.stdout
+        .transform(DockerUtils.utf8Decoder)
+        .transform(DockerUtils.lineSplitter);
+
+    final logPath = path.joinAll([fp, 'out', 'push_log']);
+    final logFile = await File(logPath).create(recursive: true);
+
+    await for (final line in lineStream) {
+      socket?.send('push_log_part', line);
+      await logFile.writeAsString(line + '\n', mode: FileMode.append);
+    }
+
+    await process.stderr.drain();
+    // print('exit code: ${await process.exitCode}');
+    final exitCode = await process.exitCode;
+    print('pushed $uuid with exit code $exitCode');
+
+    return exitCode;
+  }
 }

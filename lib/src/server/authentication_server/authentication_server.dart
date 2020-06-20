@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:quiver/collection.dart';
+
 import '../../../code_tanks_server_common.dart';
 import '../authentication_server/authentication_database.dart';
 
@@ -25,6 +27,8 @@ class AuthenticationServer {
     print('game server urls: $gameServerAddresses');
     print('build server urls: $buildServerAddresses');
   }
+
+  final userNameToBuildServerBiMap = BiMap<String, String>();
 
   void init() async {
     server = await HttpServer.bind(address, port);
