@@ -7,14 +7,16 @@ void main() async {
   final buildServerUrls = Platform.environment['BUILD_SERVER_URLS'].split(',');
 
   final address = '0.0.0.0';
-
   const defaultPort = 9897;
 
   final port = Platform.environment.containsKey('PORT')
       ? int.parse(Platform.environment['PORT'])
       : defaultPort;
 
-  final authenticationServer =
-      AuthenticationServer(address, port, gameServerUrls, buildServerUrls);
+  final redisAddress = 'redis';
+  final redisPort = 6379;
+
+  final authenticationServer = AuthenticationServer(
+      address, port, gameServerUrls, buildServerUrls, redisAddress, redisPort);
   await authenticationServer.init();
 }

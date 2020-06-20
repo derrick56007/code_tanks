@@ -1,12 +1,14 @@
 import 'package:redis/redis.dart';
 
 class AuthenticationDatabase {
-  static const address = 'redis';
-  static const port = 6379;
+  final String address;
+  final int port;
 
   final connection = RedisConnection();
 
   Command _currentCommand;
+
+  AuthenticationDatabase(this.address, this.port);
 
   Future<void> init() async {
     print('connecting to redis db...');

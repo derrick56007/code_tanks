@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:http_server/http_server.dart';
+
 import '../../../code_tanks_server_common.dart';
 
 class WebServer {
@@ -12,7 +14,25 @@ class WebServer {
   HttpServer server;
   StreamSubscription<HttpRequest> sub;
 
-  WebServer(this.address, this.port, this.authenticationServerUrl): authenticationSocket = DummySocket(authenticationServerUrl);
+  final defaultPage = File('build/index.html');
+  final staticFiles = VirtualDirectory('build/');
+
+  WebServer(this.address, this.port, this.authenticationServerUrl)
+      : authenticationSocket = DummySocket(authenticationServerUrl) {
+    staticFiles
+      ..jailRoot = false
+      ..allowDirectoryListing = true
+      ..directoryHandler = (dir, request) async {
+        final indexUri = Uri.file(dir.path).resolve('index.html');
+
+        var file = File(indexUri.toFilePath());
+
+        if (!(await file.exists())) {
+          file = defaultPage;
+        }
+        staticFiles.serveFile(file, request);
+      };
+  }
 
   void init() async {
     server = await HttpServer.bind(address, port);
@@ -29,6 +49,7 @@ class WebServer {
   }
 
   void onRequest(HttpRequest req) async {
+    req.response.headers.set('cache-control', 'no-cache');
 
     // handle websocket connection
     if (WebSocketTransformer.isUpgradeRequest(req)) {
@@ -41,7 +62,11 @@ class WebServer {
       await socket.done;
 
       handleSocketDone(socket);
+
+      return;
     }
+
+    await staticFiles.serveRequest(req);
   }
 
   void handleSocketStart(ServerWebSocket socket) {

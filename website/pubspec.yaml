@@ -6,7 +6,9 @@ description: An absolute bare-bones web app.
 environment:
   sdk: '>=2.8.1 <3.0.0'
 
-#dependencies:
+dependencies:
+  code_tanks:
+    path: ../
 #  path: ^1.7.0
 
 dev_dependencies:

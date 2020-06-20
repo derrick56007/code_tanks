@@ -7,6 +7,4 @@ void main() async {
   final socket = DummySocket('ws://$address:$port');
   await socket.start();
   await socket.done;
-
-  print('derp');
 }

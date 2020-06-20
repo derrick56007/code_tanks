@@ -16,10 +16,12 @@ class AuthenticationServer {
   final gameServerSockets = <String, ServerWebSocket>{};
   final buildServerSockets = <String, ServerWebSocket>{};
 
-  final authenticationDatabase = AuthenticationDatabase();
+  final AuthenticationDatabase authenticationDatabase;
 
   AuthenticationServer(this.address, this.port, this.gameServerAddresses,
-      this.buildServerAddresses) {
+      this.buildServerAddresses, String redisAddress, int redisPort)
+      : authenticationDatabase =
+            AuthenticationDatabase(redisAddress, redisPort) {
     print('game server urls: $gameServerAddresses');
     print('build server urls: $buildServerAddresses');
   }
@@ -87,7 +89,7 @@ class AuthenticationServer {
         buildServerSockets[address] = socket;
         print('build server handshake success');
       })
-      ..on('webserver_handshake', () {
+      ..on('web_server_handshake', () {
         final address = req.connectionInfo.remoteAddress.address;
 
         print('handshake from web server $address');
