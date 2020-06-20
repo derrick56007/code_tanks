@@ -4,26 +4,26 @@ import 'package:code_tanks/code_tanks_authentication_server.dart';
 import 'package:code_tanks/code_tanks_web_server.dart';
 
 void main() async {
-  final gameServerAddress = '127.0.0.1';
-  final gameServerPort = 9899;
+  const gameServerAddress = '127.0.0.1';
+  const gameServerPort = 9899;
 
-  final buildServerAddress = '127.0.0.1';
-  final buildServerPort = 9898;
+  const buildServerAddress = gameServerAddress;
+  const buildServerPort = 9898;
 
-  final authenticationServerAddress = '127.0.0.1';
-  final authenticationServerPort = 9897;
+  const authenticationServerAddress = gameServerAddress;
+  const authenticationServerPort = 9897;
 
-  final webServerAddress = '127.0.0.1';
-  final webServerPort = 9896;
+  const webServerAddress = gameServerAddress;
+  const webServerPort = 9896;
 
-  final redisAddress = '127.0.0.1';
-  final redisPort = 6379;
+  const redisAddress = gameServerAddress;
+  const redisPort = 6379;
 
-  final authenticationServerUrl =
+  const authenticationServerUrl =
       'ws://$authenticationServerAddress:$authenticationServerPort';
 
-  final gameServerAddresses = [gameServerAddress];
-  final buildServerAddresses = [buildServerAddress];
+  const gameServerAddresses = [gameServerAddress];
+  const buildServerAddresses = [buildServerAddress];
 
   final authenticationServer = AuthenticationServer(
       authenticationServerAddress,
@@ -38,7 +38,7 @@ void main() async {
       GameServer(gameServerAddress, gameServerPort, authenticationServerUrl);
   await gameServer.init();
 
-  final fileDir = 'temp/';
+  const fileDir = 'temp/';
   final buildServer = BuildServer(
       buildServerAddress, buildServerPort, fileDir, authenticationServerUrl);
   await buildServer.init();
