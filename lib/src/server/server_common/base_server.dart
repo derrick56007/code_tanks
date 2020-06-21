@@ -33,19 +33,19 @@ abstract class BaseServer {
 
       await socket.start();
 
-      handleSocketStart(socket);
+      handleSocketStart(req, socket);
 
       await socket.done;
 
-      handleSocketDone(socket);
+      handleSocketDone(req, socket);
     }
 
     await onRequestPost(req);
   }
 
-  void handleSocketStart(ServerWebSocket socket);
+  void handleSocketStart(HttpRequest req, ServerWebSocket socket);
 
-  void handleSocketDone(ServerWebSocket socket);
+  void handleSocketDone(HttpRequest req, ServerWebSocket socket);
 
   Future close() async {
     await sub.cancel();

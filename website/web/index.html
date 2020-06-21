@@ -20,11 +20,11 @@
 
 <body style="display: flex; background-color: grey;">
 
-  <div class="mdc-card" style="margin: auto; padding: 10px; width: 350px;">
+  <div id="login-card" class="mdc-card" style="margin: auto; padding: 10px; width: 350px;">
     <div class="mdc-row" style="width: 100%;">
       <!-- Render textfield component -->
       <label class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField" style="width: 100%;">
-        <input type="text" class="mdc-text-field__input" aria-labelledby="login-username-label">
+        <input id="login-username" type="text" class="mdc-text-field__input" aria-labelledby="login-username-label">
         <span class="mdc-notched-outline">
           <span class="mdc-notched-outline__leading"></span>
           <span class="mdc-notched-outline__notch">
@@ -38,7 +38,7 @@
     <div class="mdc-row" style="margin-top: 15px; width: 100%;">
       <!-- Render textfield component -->
       <label class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField" style="width: 100%;">
-        <input type="text" class="mdc-text-field__input" aria-labelledby="login-password-label">
+        <input id="login-password" type="password" class="mdc-text-field__input" aria-labelledby="login-password-label">
         <span class="mdc-notched-outline">
           <span class="mdc-notched-outline__leading"></span>
           <span class="mdc-notched-outline__notch">
@@ -72,11 +72,81 @@
     </div>
 
     <div class="mdc-row" style="margin-top: 10px; display: flex;">
-      <button class="mdc-button mdc-button--raised" style="margin: auto; width: 100%;" data-mdc-auto-init="MDCRipple">
+      <button id="login-btn" class="mdc-button mdc-button--raised" style="margin: auto; width: 100%;" data-mdc-auto-init="MDCRipple">
         <div class="mdc-button__ripple"></div>
         <span class="mdc-button__label">Login</span>
         <i class="material-icons mdc-button__icon" aria-hidden="true">send</i>
       </button>
+    </div>
+
+    <div class="mdc-row" style="margin-top: 10px; display: flex; font-size: .875em; justify-content: space-evenly;">
+      <div class="mdc-col">
+        Need an account?
+      </div>
+      <div class="mdc-col">
+        <a id="sign-up-btn" style="color: #0645AD; cursor: pointer;">Sign up</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="register-card" class="mdc-card" style="margin: auto; padding: 10px; width: 350px; display: none;">
+    <div class="mdc-row" style="width: 100%;">
+      <!-- Render textfield component -->
+      <label class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField" style="width: 100%;">
+        <input id="register-username" type="text" class="mdc-text-field__input" aria-labelledby="register-username-label">
+        <span class="mdc-notched-outline">
+          <span class="mdc-notched-outline__leading"></span>
+          <span class="mdc-notched-outline__notch">
+            <span class="mdc-floating-label" id="register-username-label">Username</span>
+          </span>
+          <span class="mdc-notched-outline__trailing"></span>
+        </span>
+      </label>
+    </div>
+
+    <div class="mdc-row" style="margin-top: 15px; width: 100%;">
+      <!-- Render textfield component -->
+      <label class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField" style="width: 100%;">
+        <input id="register-password" type="password" class="mdc-text-field__input" aria-labelledby="register-password-label">
+        <span class="mdc-notched-outline">
+          <span class="mdc-notched-outline__leading"></span>
+          <span class="mdc-notched-outline__notch">
+            <span class="mdc-floating-label" id="register-password-label">Password</span>
+          </span>
+          <span class="mdc-notched-outline__trailing"></span>
+        </span>
+      </label>
+    </div>
+
+    <div class="mdc-row" style="margin-top: 15px; width: 100%;">
+      <!-- Render textfield component -->
+      <label class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField" style="width: 100%;">
+        <input id="register-password-confirm" type="password" class="mdc-text-field__input" aria-labelledby="register-password-confirm-label">
+        <span class="mdc-notched-outline">
+          <span class="mdc-notched-outline__leading"></span>
+          <span class="mdc-notched-outline__notch">
+            <span class="mdc-floating-label" id="register-password-confirm-label">Confirm Password</span>
+          </span>
+          <span class="mdc-notched-outline__trailing"></span>
+        </span>
+      </label>
+    </div>
+
+    <div class="mdc-row" style="margin-top: 10px; display: flex;">
+      <button id="register-btn" class="mdc-button mdc-button--raised" style="margin: auto; width: 100%;" data-mdc-auto-init="MDCRipple">
+        <div class="mdc-button__ripple"></div>
+        <span class="mdc-button__label">Register</span>
+        <i class="material-icons mdc-button__icon" aria-hidden="true">send</i>
+      </button>
+    </div>
+
+    <div class="mdc-row" style="margin-top: 10px; display: flex; font-size: .875em; justify-content: space-evenly;">
+      <div class="mdc-col">
+        Already have an account?
+      </div>
+      <div class="mdc-col">
+        <a id="sign-in-btn" style="color: #0645AD; cursor: pointer;">Sign in</a>
+      </div>
     </div>
   </div>
 

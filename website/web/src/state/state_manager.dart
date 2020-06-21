@@ -25,6 +25,7 @@ class StateManager {
       return;
     }
 
+    print('pushed $stateName');
     _showState(stateName);
   }
 

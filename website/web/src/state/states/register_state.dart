@@ -1,17 +1,72 @@
+import 'dart:async';
+import 'dart:html';
+
 import '../../client_web_socket/client_websocket.dart';
 import '../state.dart';
+import '../state_manager.dart';
 
 class RegisterState extends State {
-  RegisterState(ClientWebSocket client) : super(client);
+  final Element registerCard = querySelector('#register-card');
 
-  @override
-  void hide() {
-    // TODO: implement hide
+  final InputElement registerUsernameEl = querySelector('#register-username');
+  final InputElement registerPassword =
+      document.querySelector('#register-password');
+  final InputElement registerPasswordConfirm =
+      document.querySelector('#register-password-confirm');
+
+  StreamSubscription submitSub;
+
+  RegisterState(ClientWebSocket client) : super(client) {
+    querySelector('#register-btn').onClick.listen((_) => submitRegister());
+    querySelector('#sign-in-btn')
+        .onClick
+        .listen((_) => StateManager.shared.pushState('login'));
   }
 
   @override
   void show() {
-    // TODO: implement show
+    registerCard.style.display = '';
+
+    registerUsernameEl
+      ..autofocus = true
+      ..select();
+
+    submitSub = window.onKeyPress.listen((KeyboardEvent e) {
+      if (e.keyCode == KeyCode.ENTER) {
+        submitRegister();
+      }
+    });
   }
-  
+
+  @override
+  void hide() {
+    registerCard.style.display = 'none';
+    submitSub?.cancel();
+  }
+
+  void submitRegister() {
+    if (!client.isConnected()) {
+      print('Not connected');
+      return;
+    }
+
+    final username = registerUsernameEl.value.trim();
+    final password = registerPassword.value.trim();
+
+    if (username.isEmpty || password.isEmpty) {
+      print('Not a valid username/password');
+      return;
+    }
+
+    final passwordConfirm = registerPasswordConfirm.value.trim();
+
+    if (password != passwordConfirm) {
+      print('Passwords don\'t match');
+      return;
+    }
+
+    final loginInfo = {'username': username, 'password': password};
+
+    client.send('register', loginInfo);
+  }
 }

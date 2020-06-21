@@ -40,12 +40,12 @@ class WebServer extends ControlServer {
   }
 
   @override
-  void handleSocketDone(ServerWebSocket socket) {
+  void handleSocketDone(HttpRequest req, ServerWebSocket socket) {
     // TODO: implement handleSocketDone
   }
 
   @override
-  void handleSocketStart(ServerWebSocket socket) {
+  void handleSocketStart(HttpRequest req, ServerWebSocket socket) {
     // TODO: implement handleSocketStart
   }
 }
