@@ -21,6 +21,8 @@ class RegisterState extends State {
     querySelector('#sign-in-btn')
         .onClick
         .listen((_) => StateManager.shared.pushState('login'));
+
+        client..on('register_successful', _registerSuccessful)..on('register_failure', _registerFailure);
   }
 
   @override
@@ -68,5 +70,13 @@ class RegisterState extends State {
     final loginInfo = {'username': username, 'password': password};
 
     client.send('register', loginInfo);
+  }
+
+  void _registerSuccessful(data) {
+    print('register successful = $data');
+  }
+
+  void _registerFailure(data) {
+    print('register failure = $data');
   }
 }
