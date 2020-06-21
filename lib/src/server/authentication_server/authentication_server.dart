@@ -64,7 +64,7 @@ class AuthenticationServer extends BaseServer {
 
     print('handshake from build server $address');
 
-    if (buildServerAddresses.lookup(address) != null) {
+    if (buildServerAddresses.lookup(address) == null) {
       print('address is not a valid build server $address');
       return;
     }
@@ -82,7 +82,7 @@ class AuthenticationServer extends BaseServer {
 
     print('handshake from game server $address');
 
-    if (gameServerAddresses.lookup(address) != null) {
+    if (gameServerAddresses.lookup(address) == null) {
       print('address is not a valid game server $address');
       return;
     }
