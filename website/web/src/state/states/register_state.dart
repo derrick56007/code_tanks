@@ -22,7 +22,9 @@ class RegisterState extends State {
         .onClick
         .listen((_) => StateManager.shared.pushState('login'));
 
-        client..on('register_successful', _registerSuccessful)..on('register_failure', _registerFailure);
+    client
+      ..on('register_successful', _registerSuccessful)
+      ..on('register_failure', _registerFailure);
   }
 
   @override
@@ -72,8 +74,8 @@ class RegisterState extends State {
     client.send('register', loginInfo);
   }
 
-  void _registerSuccessful(data) {
-    print('register successful = $data');
+  void _registerSuccessful() {
+    print('register successful');
   }
 
   void _registerFailure(data) {

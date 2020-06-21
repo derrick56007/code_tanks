@@ -64,7 +64,7 @@ class LoginState extends State {
       print('Not a valid username');
       return;
     }
-    
+
     final password = loginPassword.value.trim();
 
     if (password.isEmpty) {
@@ -77,7 +77,23 @@ class LoginState extends State {
     client.send('login', loginInfo);
   }
 
-  void _loginSuccessful() {
+  void _loginSuccessful(data) {
+    if (!(data is Map)) {
+      print('invalid data type = $data');
+      return;
+    }
+
+    final authToken = data['auth_token'];
+
+    if (authToken == null) {
+      print('non existent auth token');
+      return;
+    }
+
+    print('successfully logged in');
+
+    // TODO save auth token
+
     StateManager.shared.pushState('play');
   }
 

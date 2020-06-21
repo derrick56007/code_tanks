@@ -16,14 +16,6 @@ class DockerUtils {
 
   static Future<int> build(String fp, String uuid,
       [ServerWebSocket socket]) async {
-    //     Process.start('ls', [], runInShell: true).then((Process process) {
-    //   process.stdout
-    //       .transform(utf8.decoder)
-    //       .listen((data) { print(data); });
-    //   // process.stdin.writeln('Hello, world!');
-    //   // process.stdin.writeln('Hello, galaxy!');
-    //   // process.stdin.writeln('Hello, universe!');
-    // });
 
     final dockerFilePath = path.join(fp, 'Dockerfile');
 
