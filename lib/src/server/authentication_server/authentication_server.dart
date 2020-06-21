@@ -157,8 +157,8 @@ class AuthenticationServer extends BaseServer {
 
     final hashedPassword = hashPassword(password);
 
-    if (await authDb.registerUsernameWithHashedPassword(
-        nextUserId, username, hashedPassword)) {
+    if (!(await authDb.registerUsernameWithHashedPassword(
+        nextUserId, username, hashedPassword))) {
       socket.send('register_failure', 'failed to register $username');
       return;
     }
