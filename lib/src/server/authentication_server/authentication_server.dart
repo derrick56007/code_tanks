@@ -8,21 +8,30 @@ import '../../../code_tanks_server_common.dart';
 import '../authentication_server/authentication_database.dart';
 
 class AuthenticationServer extends BaseServer {
-  final List<String> gameServerAddresses;
-  final List<String> buildServerAddresses;
+  final gameServerAddresses = TreeSet<String>();
+  final buildServerAddresses = TreeSet<String>();
 
   final gameServerSockets = <String, ServerWebSocket>{};
   final buildServerSockets = <String, ServerWebSocket>{};
 
   final AuthenticationDatabase authDb;
   final userNameToBuildServerBiMap = BiMap<String, String>();
+  final loggedInSockets = TreeSet<ServerWebSocket>();
 
-  AuthenticationServer(String address, int port, this.gameServerAddresses,
-      this.buildServerAddresses, String redisAddress, int redisPort)
+  AuthenticationServer(
+      String address,
+      int port,
+      List<String> _gameServerAddresses,
+      List<String> _buildServerAddresses,
+      String redisAddress,
+      int redisPort)
       : authDb = AuthenticationDatabase(redisAddress, redisPort),
         super('authentication', address, port) {
-    print('game server urls: $gameServerAddresses');
-    print('build server urls: $buildServerAddresses');
+    print('game server urls: $_gameServerAddresses');
+    print('build server urls: $_buildServerAddresses');
+
+    gameServerAddresses.addAll(_gameServerAddresses);
+    buildServerAddresses.addAll(_buildServerAddresses);
   }
 
   @override
@@ -39,20 +48,15 @@ class AuthenticationServer extends BaseServer {
       ..on('web_server_handshake', () => onWebServerHandshake(req, socket))
       ..on('register', (data) => onRegister(socket, data))
       ..on('login', (data) => onLogin(socket, data))
-      ..on('logout', (data) => onLogout(socket, data));
+      ..on('logout', () => onLogout(socket));
   }
 
   @override
   void handleSocketDone(HttpRequest req, ServerWebSocket socket) {
     final address = req.connectionInfo.remoteAddress.address;
 
-    if (gameServerSockets.containsValue(address)) {
-      gameServerSockets.remove(address);
-    }
-
-    if (buildServerSockets.containsValue(address)) {
-      buildServerSockets.remove(address);
-    }
+    gameServerSockets.remove(address);
+    buildServerSockets.remove(address);
   }
 
   void onBuildServerHandshake(HttpRequest req, ServerWebSocket socket) {
@@ -60,7 +64,7 @@ class AuthenticationServer extends BaseServer {
 
     print('handshake from build server $address');
 
-    if (!buildServerAddresses.contains(address)) {
+    if (buildServerAddresses.lookup(address) != null) {
       print('address is not a valid build server $address');
       return;
     }
@@ -78,7 +82,7 @@ class AuthenticationServer extends BaseServer {
 
     print('handshake from game server $address');
 
-    if (!gameServerAddresses.contains(address)) {
+    if (gameServerAddresses.lookup(address) != null) {
       print('address is not a valid game server $address');
       return;
     }
@@ -114,7 +118,7 @@ class AuthenticationServer extends BaseServer {
   Future<void> onRegister(ServerWebSocket socket, data) async {
     print('register data = $data');
 
-    await onLogout(socket, data);
+    logoutSocket(socket);
 
     if (!(data is Map)) {
       print('incorrect data type for registering');
@@ -167,6 +171,8 @@ class AuthenticationServer extends BaseServer {
   Future<void> onLogin(ServerWebSocket socket, data) async {
     print('login data = $data');
 
+    logoutSocket(socket);
+
     if (!(data is Map)) {
       print('incorrect data type for login');
       return;
@@ -212,57 +218,27 @@ class AuthenticationServer extends BaseServer {
 
     print('logged in $username successfully');
 
-    final authToken = generateAuthenticationToken();
+    loggedInSockets.add(socket);
 
-    final m = {'auth_token': authToken};
-
-    await authDb.deleteAuthTokenOfUserId(userId);
-    await authDb.setUserIDAuthToken(userId, authToken);
-
-    socket.send('login_successful', m);
+    socket.send('login_successful');
   }
 
-  Future<bool> isLoggedIn(String authToken) async {
-    final userId = await authDb.getUserIdFromAuthToken(authToken);
+  bool isLoggedIn(ServerWebSocket socket) => loggedInSockets.contains(socket);
 
-    if (userId == 'null') {
-      return false;
-    }
+  void onLogout(ServerWebSocket socket) {
+    final logoutSuccessful = logoutSocket(socket);
 
-    final authTokenForFoundUserId = await authDb.getAuthTokenFromUserId(userId);
-
-    return authToken == authTokenForFoundUserId;
-  }
-
-  Future<void> onLogout(ServerWebSocket socket, data) async {
-    if (!(data is Map)) {
-      print('wrong data type = $data');
+    if (!logoutSuccessful) {
       return;
     }
 
-    final authToken = data['auth_token'];
-    if (authToken == null) {
-      print('no auth token');
-      return;
-    }
-
-    if (!(await isLoggedIn(authToken))) {
-      print('not logged in');
-      return;
-    }
-
-    final userId = await authDb.getUserIdFromAuthToken(authToken);
-
-    await authDb.deleteAuthTokenOfUserId(userId);
+    socket.send('logout_successful');
   }
+
+  bool logoutSocket(ServerWebSocket socket) => loggedInSockets.remove(socket);
 
   static String hashPassword(String password) {
     // TODO
     return password;
-  }
-
-  static String generateAuthenticationToken() {
-    // TODO
-    return Object().hashCode.toString();
   }
 }
