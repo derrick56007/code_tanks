@@ -8,8 +8,9 @@ services:
     ports: 
       - 9897:9897
     environment: 
-      - GAME_SERVER_URLS=172.22.0.1
-      - BUILD_SERVER_URLS=172.22.0.1
+      - GAME_SERVER_ADDRESSES=172.22.0.1
+      - BUILD_SERVER_ADDRESSES=172.22.0.1
+      - REGISTRY_SERVER_ADDRESSES=172.22.0.1
       - PORT=9897
       - REDIS_ADDRESS=redis
     depends_on: 

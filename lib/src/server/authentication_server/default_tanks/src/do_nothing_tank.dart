@@ -1,5 +1,5 @@
 Map getDoNothingTank() => {
-  'name': 'DoNothingTank',
+  'tank_name': 'DoNothingTank',
   'language': 'en',
   'code_language': 'dart',
   'code': '''

@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.55.0/codemirror.min.css" />
+
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="favicon.ico">
   <script defer src="main.dart.js"></script>
@@ -65,14 +67,16 @@
           <label for="my-checkbox">Keep me logged in</label>
         </div>
       </div>
-      <div class="mdc-col" style="text-align: right; flex-grow: 1; font-size: .875em; line-height: 30px; height: 30px; margin: auto;">
+      <div class="mdc-col"
+        style="text-align: right; flex-grow: 1; font-size: .875em; line-height: 30px; height: 30px; margin: auto;">
         <a style="color: #0645AD; cursor: pointer;">Forgot Password?</a>
       </div>
 
     </div>
 
     <div class="mdc-row" style="margin-top: 10px; display: flex;">
-      <button id="login-btn" class="mdc-button mdc-button--raised" style="margin: auto; width: 100%;" data-mdc-auto-init="MDCRipple">
+      <button id="login-btn" class="mdc-button mdc-button--raised" style="margin: auto; width: 100%;"
+        data-mdc-auto-init="MDCRipple">
         <div class="mdc-button__ripple"></div>
         <span class="mdc-button__label">Login</span>
         <i class="material-icons mdc-button__icon" aria-hidden="true">send</i>
@@ -93,7 +97,8 @@
     <div class="mdc-row" style="width: 100%;">
       <!-- Render textfield component -->
       <label class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField" style="width: 100%;">
-        <input id="register-username" type="text" class="mdc-text-field__input" aria-labelledby="register-username-label">
+        <input id="register-username" type="text" class="mdc-text-field__input"
+          aria-labelledby="register-username-label">
         <span class="mdc-notched-outline">
           <span class="mdc-notched-outline__leading"></span>
           <span class="mdc-notched-outline__notch">
@@ -107,7 +112,8 @@
     <div class="mdc-row" style="margin-top: 15px; width: 100%;">
       <!-- Render textfield component -->
       <label class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField" style="width: 100%;">
-        <input id="register-password" type="password" class="mdc-text-field__input" aria-labelledby="register-password-label">
+        <input id="register-password" type="password" class="mdc-text-field__input"
+          aria-labelledby="register-password-label">
         <span class="mdc-notched-outline">
           <span class="mdc-notched-outline__leading"></span>
           <span class="mdc-notched-outline__notch">
@@ -121,7 +127,8 @@
     <div class="mdc-row" style="margin-top: 15px; width: 100%;">
       <!-- Render textfield component -->
       <label class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField" style="width: 100%;">
-        <input id="register-password-confirm" type="password" class="mdc-text-field__input" aria-labelledby="register-password-confirm-label">
+        <input id="register-password-confirm" type="password" class="mdc-text-field__input"
+          aria-labelledby="register-password-confirm-label">
         <span class="mdc-notched-outline">
           <span class="mdc-notched-outline__leading"></span>
           <span class="mdc-notched-outline__notch">
@@ -133,7 +140,8 @@
     </div>
 
     <div class="mdc-row" style="margin-top: 10px; display: flex;">
-      <button id="register-btn" class="mdc-button mdc-button--raised" style="margin: auto; width: 100%;" data-mdc-auto-init="MDCRipple">
+      <button id="register-btn" class="mdc-button mdc-button--raised" style="margin: auto; width: 100%;"
+        data-mdc-auto-init="MDCRipple">
         <div class="mdc-button__ripple"></div>
         <span class="mdc-button__label">Register</span>
         <i class="material-icons mdc-button__icon" aria-hidden="true">send</i>
@@ -150,12 +158,80 @@
     </div>
   </div>
 
+  <div id="play-card" class="mdc-card" style="display: none;">
+    <div class="left-window" style="height: 100%;">
+      <div id="one" style="position: relative;">
+        <div id="editor" contenteditable="true" style="height: 100%;">
+
+        </div>
+        <div contenteditable="false" style="display: flex; top: 0; right: 0; position: absolute;">
+          <button id="build-btn" class="mdc-button mdc-button--raised" style="margin-top: 5px; margin-right: 5px;">
+            <div class="mdc-button__ripple"></div>
+            <span class="mdc-button__label">Build</span>
+            <i class="material-icons mdc-button__icon" aria-hidden="true">
+              send
+            </i>
+          </button>
+          <button id="run-btn" class="mdc-button mdc-button--raised" style="margin-top: 5px; margin-right: 5px;"
+            disabled>
+            <div class="mdc-button__ripple"></div>
+            <span class="mdc-button__label">Run</span>
+            <i class="material-icons mdc-button__icon" aria-hidden="true">
+              send
+            </i>
+          </button>
+        </div>
+      </div>
+      <div id="two">
+        <div class="right-window" style="height: 100%;">
+          <div id="three">Three</div>
+          <div id="four" style="overflow: auto;">
+            <div id="log-output">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Required Material Web JavaScript library -->
   <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
 
+  <!-- SplitJS Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.0/split.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.55.0/codemirror.min.js"></script>
+
   <!-- Instantiate single textfield component rendered in the document -->
   <script>
+    window.onload
+
     window.mdc.autoInit();
+
+    Split(['#one', '#two'], {
+      elementStyle: (dimension, size, gutterSize) => ({
+        'flex-basis': `calc(${size}% - ${gutterSize}px)`,
+      }),
+      gutterStyle: (dimension, gutterSize) => ({
+        'flex-basis': `${gutterSize}px`,
+      }),
+    });
+
+    Split(['#three', '#four'], {
+      elementStyle: (dimension, size, gutterSize) => ({
+        'flex-basis': `calc(${size}% - ${gutterSize}px)`,
+      }),
+      gutterStyle: (dimension, gutterSize) => ({
+        'flex-basis': `${gutterSize}px`,
+      }),
+      direction: 'vertical',
+    });
+
+    var editor = document.querySelector('#editor');
+
+    // var myCodeMirror = CodeMirror(editor, {
+    //   mode: 'dart'
+    // });
   </script>
 
 </body>

@@ -1,19 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:code_tanks/src/server/server_common/control_server.dart';
+import 'package:code_tanks/src/server/server_common/base_server.dart';
 import 'package:http_server/http_server.dart';
 
 import '../../../code_tanks_server_common.dart';
 
-class WebServer extends ControlServer {
+class WebServer extends BaseServer {
   final defaultPage = File('build/index.html');
   final staticFiles = VirtualDirectory('build/');
 
-  WebServer(String address, int port, String authenticationServerAddress,
-      int authenticationServerPort)
-      : super('web', address, port, authenticationServerAddress,
-            authenticationServerPort) {
+  WebServer(String address, int port) : super('web', address, port) {
     staticFiles
       ..jailRoot = false
       ..allowDirectoryListing = true
@@ -41,11 +38,9 @@ class WebServer extends ControlServer {
 
   @override
   void handleSocketDone(HttpRequest req, ServerWebSocket socket) {
-    // TODO: implement handleSocketDone
   }
 
   @override
   void handleSocketStart(HttpRequest req, ServerWebSocket socket) {
-    // TODO: implement handleSocketStart
   }
 }

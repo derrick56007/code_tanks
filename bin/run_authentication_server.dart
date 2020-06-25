@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:code_tanks/code_tanks_authentication_server.dart';
 
 void main() async {
-  final gameServerUrls = Platform.environment.containsKey('GAME_SERVER_URLS')
-      ? Platform.environment['GAME_SERVER_URLS'].split(',')
+  final gameServerAddresses = Platform.environment.containsKey('GAME_SERVER_ADDRESSES')
+      ? Platform.environment['GAME_SERVER_ADDRESSES'].split(',')
       : ['127.0.0.1'];
 
-  final buildServerUrls = Platform.environment.containsKey('BUILD_SERVER_URLS')
-      ? Platform.environment['BUILD_SERVER_URLS'].split(',')
-      : ['127.0.0.1'];
+  final buildServerAddresses = Platform.environment.containsKey('BUILD_SERVER_ADDRESSES')
+      ? Platform.environment['BUILD_SERVER_ADDRESSES'].split(',')
+      : ['127.0.0.1'];   
 
   const address = '0.0.0.0';
   const defaultPort = 9897;
@@ -24,6 +24,6 @@ void main() async {
   const redisPort = 6379;
 
   final authenticationServer = AuthenticationServer(
-      address, port, gameServerUrls, buildServerUrls, redisAddress, redisPort);
+      address, port, gameServerAddresses, buildServerAddresses, redisAddress, redisPort);
   await authenticationServer.init();
 }

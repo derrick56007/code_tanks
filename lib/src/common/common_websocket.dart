@@ -9,13 +9,18 @@ abstract class CommonWebSocket {
   Future done;
 
   Future start();
-  
+
   void on(String type, Function function) {
     if (dispatchers.containsKey(type)) {
-      throw CTError('Overriding dispatch $type');
+      print(CTError('Overriding dispatch $type'));
     }
 
     dispatchers[type] = function;
+  }
+
+  bool removeDispatch(String type) {
+    print('removing dispatch $type');
+    return  dispatchers.remove(type) != null;
   }
 
   void send(String type, [message]);

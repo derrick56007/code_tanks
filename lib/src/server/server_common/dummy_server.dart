@@ -1,20 +1,22 @@
-import '../server_common/base_server.dart';
 import '../server_common/dummy_socket.dart';
 
-abstract class ControlServer extends BaseServer {
+abstract class DummyServer 
+// extends BaseServer 
+{
+  final String name;
   final String authenticationServerAddress;
   final int authenticationServerPort;
   final DummySocket authenticationSocket;
 
-  ControlServer(String name, String address, int port,
+  DummyServer(this.name,
       this.authenticationServerAddress, this.authenticationServerPort)
       : authenticationSocket = DummySocket(
-            'ws://$authenticationServerAddress:$authenticationServerPort'),
-        super(name, address, port);
+            'ws://$authenticationServerAddress:$authenticationServerPort');
+            // ,super(name, address, port);
 
-  @override
+  // @override
   void init() async {
-    await super.init();
+    // await super.init();
 
     await authenticationSocket.start();
     print('connected to authentication server $authenticationServerAddress:$authenticationServerPort');

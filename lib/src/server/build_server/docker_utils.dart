@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:code_tanks/code_tanks_server_common.dart';
+
 import '../server_common/server_websocket.dart';
 import '../server_utils/utils.dart';
 import 'package:path/path.dart' as path;
@@ -15,7 +17,7 @@ class DockerUtils {
   };
 
   static Future<int> build(String fp, String uuid,
-      [ServerWebSocket socket]) async {
+      DummySocket socket) async {
 
     final dockerFilePath = path.join(fp, 'Dockerfile');
 
@@ -32,7 +34,7 @@ class DockerUtils {
     final logFile = await File(logPath).create(recursive: true);
 
     await for (final line in lineStream) {
-      socket?.send('build_log_part', line);
+      socket.send('build_code_log_part_$uuid', line);
       await logFile.writeAsString(line + '\n', mode: FileMode.append);
     }
 
@@ -75,7 +77,7 @@ class DockerUtils {
   }
 
   static Future<int> saveToRegistry(String fp, String uuid,
-      [ServerWebSocket socket]) async {
+      DummySocket socket) async {
     const registryAddress = 'localhost';
     const registryPort = 5000;
 
@@ -83,7 +85,7 @@ class DockerUtils {
     final tagArgs = ['tag', uuid, newTag];
 
     final tagProcess = await Process.start('docker', tagArgs, runInShell: true);
-    print('running tag push with args: $tagArgs');
+    print('running docker tag with args: $tagArgs');
     final tagExitCode = await tagProcess.stderr.drain();
 
     if (tagExitCode != null) {
@@ -103,7 +105,7 @@ class DockerUtils {
     final logFile = await File(logPath).create(recursive: true);
 
     await for (final line in lineStream) {
-      socket?.send('push_log_part', line);
+      socket.send('push_code_log_part_$uuid', line);
       await logFile.writeAsString(line + '\n', mode: FileMode.append);
     }
 

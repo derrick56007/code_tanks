@@ -1,9 +1,9 @@
-library prebuilt_tanks;
+library default_tanks;
 
 import 'src/do_nothing_tank.dart'
     as do_nothing_tank;
 
-class PreDefinedTanks {
+class DefaultTanks {
   static final tankMap = <String, Map>{
     'do_nothing_tank': do_nothing_tank.getDoNothingTank(),
   };

@@ -14,10 +14,16 @@ class RegisterState extends State {
   final InputElement registerPasswordConfirm =
       document.querySelector('#register-password-confirm');
 
+  final registerBtn = querySelector('#register-btn');
+
   StreamSubscription submitSub;
 
   RegisterState(ClientWebSocket client) : super(client) {
-    querySelector('#register-btn').onClick.listen((_) => submitRegister());
+    registerBtn.onClick.listen((_) {
+      registerBtn.blur();
+      submitRegister();
+    });
+
     querySelector('#sign-in-btn')
         .onClick
         .listen((_) => StateManager.shared.pushState('login'));
@@ -76,6 +82,8 @@ class RegisterState extends State {
 
   void _registerSuccessful() {
     print('register successful');
+
+    StateManager.shared.pushState('login');
   }
 
   void _registerFailure(data) {
