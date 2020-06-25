@@ -84,6 +84,7 @@ class AuthenticationDatabase {
   Future<bool> saveTankIdForUser(String userId, String tankName, String tankId) async {
     final primaryKey = 'user:$userId:tanks';
     final results = (await send_object(['HSET', primaryKey, tankName, tankId])).toString();
-    return results == '1';
+        
+    return results == '1' || results == '0';
   }
 }

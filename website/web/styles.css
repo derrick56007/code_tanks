@@ -75,9 +75,5 @@ html, body {
   overflow-x: hidden;
 }
 
-[contenteditable] {
-  outline: 0px solid transparent;
-}
-
 .log {
 }

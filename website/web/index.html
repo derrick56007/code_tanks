@@ -13,7 +13,8 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.55.0/codemirror.min.css" />
+  <!-- Required Styles for CodeMirror -->
+  <link href="packages/codemirror/codemirror.css" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="favicon.ico">
@@ -161,10 +162,8 @@
   <div id="play-card" class="mdc-card" style="display: none;">
     <div class="left-window" style="height: 100%;">
       <div id="one" style="position: relative;">
-        <div id="editor" contenteditable="true" style="height: 100%;">
 
-        </div>
-        <div contenteditable="false" style="display: flex; top: 0; right: 0; position: absolute;">
+        <div style="display: flex;">
           <button id="build-btn" class="mdc-button mdc-button--raised" style="margin-top: 5px; margin-right: 5px;">
             <div class="mdc-button__ripple"></div>
             <span class="mdc-button__label">Build</span>
@@ -180,6 +179,10 @@
               send
             </i>
           </button>
+        </div>
+
+        <div id="editor" style="">
+
         </div>
       </div>
       <div id="two">
@@ -200,7 +203,8 @@
   <!-- SplitJS Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.0/split.min.js"></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.55.0/codemirror.min.js"></script>
+  <!-- CodeMirror Library -->
+  <script src="packages/codemirror/codemirror.js"></script>
 
   <!-- Instantiate single textfield component rendered in the document -->
   <script>
@@ -227,11 +231,11 @@
       direction: 'vertical',
     });
 
-    var editor = document.querySelector('#editor');
+    // var editor = document.querySelector('#editor');
 
-    // var myCodeMirror = CodeMirror(editor, {
-    //   mode: 'dart'
-    // });
+    // // var myCodeMirror = CodeMirror(editor, {
+    // //   mode: 'dart'
+    // // });
   </script>
 
 </body>

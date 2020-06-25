@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:html';
 
+import 'package:codemirror/codemirror.dart';
+
 import '../../client_web_socket/client_websocket.dart';
 import '../state.dart';
 
@@ -13,6 +15,13 @@ class PlayState extends State {
   final Element editorElement = querySelector('#editor');
   final Element logOutput = querySelector('#log-output');
 
+  final options = <String, String>{
+  'mode': 'javascript',
+  'theme': 'monokai'
+};
+
+  CodeMirror editor;
+
   StreamSubscription buildBtnSub;
   StreamSubscription runBtnSub;
 
@@ -20,6 +29,12 @@ class PlayState extends State {
     client
     ..on('log', (data) => onLogData(data))
     ..on('build_done', (data) => onBuildDone(data));
+
+
+ editor = CodeMirror.fromElement(
+    editorElement, options: options);
+
+editor.getDoc().setValue('foo.bar(1, 2, 3);');
   }
 
   void onBuildDone(data) {
@@ -53,7 +68,7 @@ class PlayState extends State {
 
     buildBtnSub = buildBtn.onClick.listen((event) {
       if (!buildBtn.disabled) {
-        final code = editorElement.text;
+        final code = editor.getDoc().getValue();
         final codeLang = 'dart'; // TODO fix placeholder
         final tankName = 'custom'; // TODO fix placeholder
 

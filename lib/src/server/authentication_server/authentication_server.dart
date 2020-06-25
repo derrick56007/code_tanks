@@ -6,12 +6,15 @@ import 'package:code_tanks/src/server/authentication_server/default_tanks/defaul
 import 'package:code_tanks/src/server/server_common/base_server.dart';
 import 'package:code_tanks/src/server/server_utils/utils.dart';
 import 'package:crypto/crypto.dart';
+import 'package:password_hash/password_hash.dart';
 import 'package:quiver/collection.dart';
 
 import '../../../code_tanks_server_common.dart';
 import '../authentication_server/authentication_database.dart';
 
 class AuthenticationServer extends BaseServer {
+  static final _pbkdf2 = PBKDF2();
+  
   final gameServerAddresses = <String>[];
   final buildServerAddresses = <String>[];
 
@@ -48,14 +51,35 @@ class AuthenticationServer extends BaseServer {
 
   @override
   void handleSocketStart(HttpRequest req, ServerWebSocket socket) {
+    if (requestFromBuildServer(req)) {
+      socket
+        ..on('build_server_handshake',
+            () => onBuildServerHandshake(req, socket));
+    }
+
+    if (requestFromGameServer(req)) {
+      socket
+        ..on('game_server_handshake', () => onGameServerHandshake(req, socket));
+    }
+
+    // ..on('web_server_handshake', () => onWebServerHandshake(req, socket))
     socket
-      ..on('build_server_handshake', () => onBuildServerHandshake(req, socket))
-      ..on('game_server_handshake', () => onGameServerHandshake(req, socket))
-      ..on('web_server_handshake', () => onWebServerHandshake(req, socket))
       ..on('register', (data) => onRegister(socket, data))
       ..on('login', (data) => onLogin(socket, data))
       ..on('logout', () => onLogout(socket))
       ..on('build_code', (data) => onBuildCode(socket, data));
+  }
+
+  bool requestFromBuildServer(HttpRequest req) {
+    final address = req.connectionInfo.remoteAddress.address;
+
+    return buildServerAddresses.contains(address);
+  }
+
+  bool requestFromGameServer(HttpRequest req) {
+    final address = req.connectionInfo.remoteAddress.address;
+
+    return gameServerAddresses.contains(address);
   }
 
   @override
@@ -74,10 +98,6 @@ class AuthenticationServer extends BaseServer {
 
     print('handshake from build server $address');
 
-    if (!buildServerAddresses.contains(address)) {
-      print('address is not a valid build server $address');
-      return;
-    }
     if (buildServerSockets.inverse.containsKey(address)) {
       print('build server already connected: $address');
       return;
@@ -109,10 +129,12 @@ class AuthenticationServer extends BaseServer {
         return;
       }
 
-      attemptBuildCode(codeLang, code, onSuccess: (tankId) async {
+      attemptBuildCode(codeLang, code, onBuildSuccess: (tankId) async {
         print('built default tank $tankName');
 
         await authDb.saveTankIdForUser('default_tanks', tankName, tankId);
+      }, onAlreadyBuilt: () {
+        print('already built default tank $tankName');
       });
     }
 
@@ -122,12 +144,7 @@ class AuthenticationServer extends BaseServer {
   void onGameServerHandshake(HttpRequest req, ServerWebSocket socket) {
     final address = req.connectionInfo.remoteAddress.address;
 
-    print('handshake from game server $address');
-
-    if (!gameServerAddresses.contains(address)) {
-      print('address is not a valid game server $address');
-      return;
-    }
+    // print('handshake from game server $address');
 
     if (gameServerSockets.inverse.containsKey(address)) {
       print('game server already connected: $address');
@@ -198,7 +215,9 @@ class AuthenticationServer extends BaseServer {
 
     final nextUserId = await authDb.getNextUserId();
 
-    final hashedPassword = hashPassword(password);
+    final saltLength = 24;
+    final salt = Salt.generateAsBase64String(saltLength);
+    final hashedPassword = hashPassword(password, salt);
 
     if (!(await authDb.registerUsernameWithHashedPassword(
         nextUserId, username, hashedPassword))) {
@@ -251,7 +270,9 @@ class AuthenticationServer extends BaseServer {
 
     final realHashedPassword = await authDb.getHashedPasswordFromUserId(userId);
 
-    final hashedPassword = hashPassword(password);
+    final saltStringLength = 32;
+    final salt = realHashedPassword.substring(0, saltStringLength);
+    final hashedPassword = hashPassword(password, salt);
 
     if (hashedPassword != realHashedPassword) {
       print('invalid username/password');
@@ -285,9 +306,10 @@ class AuthenticationServer extends BaseServer {
     return loggedInSockets.remove(socket) != null;
   }
 
-  static String hashPassword(String password) {
-    // TODO
-    return password;
+  static String hashPassword(String password, String salt) {
+    final hash = _pbkdf2.generateKey(password, salt, 1000, 32);
+    final hashString = String.fromCharCodes(hash);
+    return '$salt$hashString';
   }
 
   bool isValidCodeUpload(String codeLang, String code, String tankName) {
@@ -353,21 +375,31 @@ class AuthenticationServer extends BaseServer {
       return;
     }
 
-    attemptBuildCode(codeLang, code, onSuccess: (tankId) async {
+    attemptBuildCode(codeLang, code, onBuildSuccess: (tankId) async {
       const msg = {'success': true};
 
       socket.send('build_done', msg);
 
       final userId = getUserIdFromSocket(socket);
 
+      print('saving for user $userId, $tankName, $tankId');
       final saved = await authDb.saveTankIdForUser(userId, tankName, tankId);
 
       if (saved) {
-        print('saved custom tank');
+        print('saved custom tank for user $userId');
       } else {
         print('error saving custom tank');
       }
-    }, onError: () {
+    }, onAlreadyBuilt: () {
+      const msg = {'success': true};
+
+      socket.send('build_done', msg);
+      print('tank already built');
+
+      const l = {'line': 'tank already built'};
+
+      socket.send('log', l);
+    }, onBuildError: () {
       socket.send('build_done', failMsg);
     }, onLog: (line) {
       final msg = {'line': line};
@@ -375,91 +407,93 @@ class AuthenticationServer extends BaseServer {
     });
   }
 
+  static void defaultOnBuildSuccess(String tankUuid) {}
+
+  static void defaultOnAlreadyBuilt() {}
+
+  static void defaultOnBuildError() {}
+
+  static void defaultOnBuildLogPart(String line) {}
+
   void attemptBuildCode(String codeLang, String code,
-      {Function onSuccess, Function onError, Function onLog}) async {
+      {void onBuildSuccess(String tankUuid) = defaultOnBuildSuccess,
+      void onAlreadyBuilt() = defaultOnAlreadyBuilt,
+      void onBuildError() = defaultOnBuildError,
+      void onLog(String line) = defaultOnBuildLogPart}) async {
     final codeLangWithCode = '$codeLang$code';
 
     final hashedCodeUpload = hashCodeUpload(codeLang, code);
 
-    var uuid =
-        await authDb.getCodeUploadUuid(hashedCodeUpload, codeLangWithCode);
-
-    if (uuid != 'null') {
+    if ((await authDb.getCodeUploadUuid(hashedCodeUpload, codeLangWithCode)) !=
+        'null') {
       // uuid exists
-      print('uuid already built');
-
-      onSuccess(uuid);
+      onAlreadyBuilt();
       return;
     }
 
-    final tempUuid = Utils.createRandomString(10);
+    final newUuid = Utils.createRandomString(10);
 
     // send to build server
     final buildServerSocket = getAnyBuildServerSocket();
 
-    Function removeDispatches = () {
+    void removeDispatches() {
       buildServerSocket
-        ..removeDispatch('build_code_success_$tempUuid')
-        ..removeDispatch('build_code_error_$tempUuid')
-        ..removeDispatch('build_code_log_part_$tempUuid')
-        ..removeDispatch('push_code_log_part_$tempUuid');
-    };
+        ..removeDispatch('build_code_success_$newUuid')
+        ..removeDispatch('build_code_error_$newUuid')
+        ..removeDispatch('build_code_log_part_$newUuid')
+        ..removeDispatch('push_code_log_part_$newUuid');
+    }
+
+    Future<void> _handleSuccess() async {
+// remove dispatch
+      removeDispatches();
+
+      if ((await authDb.getCodeUploadUuid(
+              hashedCodeUpload, codeLangWithCode)) !=
+          'null') {
+        // this means that before this build was completed, a duplicate code upload finished building first
+        onAlreadyBuilt();
+        return;
+      }
+
+      onBuildSuccess(newUuid);
+
+      final saved = await authDb.saveCodeUploadHash(
+          hashedCodeUpload, codeLangWithCode, newUuid);
+
+      if (saved) {
+        print('saved code upload hash');
+      } else {
+        print('error saving code upload hash');
+      }
+    }
+
+    void _handleError() {
+      // remove dispatch
+      removeDispatches();
+
+      onBuildError();
+    }
+
+    void _handleBuildLog(String line) {
+      print('build_code_log_part_$newUuid: $line');
+
+      onLog(line);
+    }
+
+    void _handlePushLog(String line) {
+      print('push_code_log_part_$newUuid: $line');
+
+      onLog(line);
+    }
 
     buildServerSocket
-      ..on('build_code_success_$tempUuid', () async {
-        // remove dispatch
-        removeDispatches();
+      ..on('build_code_success_$newUuid', _handleSuccess)
+      ..on('build_code_error_$newUuid', _handleError)
+      ..on('build_code_log_part_$newUuid', _handleBuildLog)
+      ..on('push_code_log_part_$newUuid', _handlePushLog);
 
-        uuid =
-            await authDb.getCodeUploadUuid(hashedCodeUpload, codeLangWithCode);
-
-        if (uuid != 'null') {
-          // this means that before this build was completed, a duplicate code upload finished building first
-          print('uuid already built');
-          if (onSuccess != null) {
-            onSuccess(uuid);
-          }
-          return;
-        }
-
-        if (onSuccess != null) {
-          onSuccess(tempUuid);
-        }
-
-        final saved = await authDb.saveCodeUploadHash(
-            hashedCodeUpload, codeLangWithCode, tempUuid);
-
-        if (saved) {
-          print('saved code upload hash');
-        } else {
-          print('error saving code upload hash');
-        }
-      })
-      ..on('build_code_error_$tempUuid', (data) {
-        // remove dispatch
-        removeDispatches();
-
-        if (onError != null) {
-          onError();
-        }
-      })
-      ..on('build_code_log_part_$tempUuid', (line) {
-        print('build_code_log_part_$tempUuid: $line');
-
-        if (onLog != null) {
-          onLog(line);
-        }
-      })
-      ..on('push_code_log_part_$tempUuid', (line) {
-        print('push_code_log_part_$tempUuid: $line');
-
-        if (onLog != null) {
-          onLog(line);
-        }
-      });
-
-    final msg = {'code_language': codeLang, 'code': code, 'uuid': tempUuid};
-
+    final msg = {'code_language': codeLang, 'code': code, 'uuid': newUuid};
     buildServerSocket.send('build_code', msg);
   }
 
