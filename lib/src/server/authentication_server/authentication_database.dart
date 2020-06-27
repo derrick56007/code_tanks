@@ -33,47 +33,32 @@ class AuthenticationDatabase {
   Future<String> getUserIdFromUsername(String username) async =>
       (await send_object(['HGET', 'users', username])).toString();
 
-  Future<String> getNextUserId() async =>
-      (await send_object(['INCR', 'next_user_id'])).toString();
+  Future<String> getNextUserId() async => (await send_object(['INCR', 'next_user_id'])).toString();
 
   Future<String> getHashedPasswordFromUserId(String userId) async =>
       (await send_object(['HGET', 'user:$userId', 'password'])).toString();
 
-  Future<bool> registerUsernameWithHashedPassword(
-      String userId, String username, String hashedPassword) async {
+  Future<bool> registerUsernameWithHashedPassword(String userId, String username, String hashedPassword) async {
     final primaryKey = 'user:$userId';
 
-    final registerResults = (await send_object([
-      'HSET',
-      primaryKey,
-      'username',
-      username,
-      'password',
-      hashedPassword
-    ]))
-        .toString();
+    final registerResults =
+        (await send_object(['HSET', primaryKey, 'username', username, 'password', hashedPassword])).toString();
 
-    final register2Results =
-        (await send_object(['HSET', 'users', username, userId])).toString();
+    final register2Results = (await send_object(['HSET', 'users', username, userId])).toString();
 
     return registerResults == '2' && register2Results == '1';
   }
 
-  Future<bool> saveCodeUploadHash(
-      String hashedCodeUpload, String codeLangWithCode, String uuid) async {
+  Future<bool> saveCodeUploadHash(String hashedCodeUpload, String codeLangWithCode, String uuid) async {
     final primaryKey = 'hashed_code_upload:$hashedCodeUpload';
-    final results =
-        (await send_object(['HSET', primaryKey, codeLangWithCode, uuid]))
-            .toString();
-    final results2 =
-        (await send_object(['HSET', 'build_uuids', uuid, uuid])).toString();
+    final results = (await send_object(['HSET', primaryKey, codeLangWithCode, uuid])).toString();
+    final results2 = (await send_object(['HSET', 'build_uuids', uuid, uuid])).toString();
 
     return results == '1' && results2 == '1';
   }
 
   Future<bool> buildUuidExists(String uuid) async {
-    final results =
-        (await send_object(['HEXISTS', 'build_uuids', uuid])).toString();
+    final results = (await send_object(['HEXISTS', 'build_uuids', uuid])).toString();
 
     return results == '1';
   }
@@ -81,18 +66,14 @@ class AuthenticationDatabase {
   // Future<String> getNextBuildId() async =>
   //   (await send_object(['INCR', 'next_build_id'])).toString();
 
-  Future<String> getCodeUploadUuid(
-      String hashedCodeUpload, String codeLangWithCode) async {
+  Future<String> getCodeUploadUuid(String hashedCodeUpload, String codeLangWithCode) async {
     final primaryKey = 'hashed_code_upload:$hashedCodeUpload';
-    return (await send_object(['HGET', primaryKey, codeLangWithCode]))
-        .toString();
+    return (await send_object(['HGET', primaryKey, codeLangWithCode])).toString();
   }
 
-  Future<bool> saveTankIdForUser(
-      String userId, String tankName, String tankId) async {
+  Future<bool> saveTankIdForUser(String userId, String tankName, String tankId) async {
     final primaryKey = 'user:$userId:tanks';
-    final results =
-        (await send_object(['HSET', primaryKey, tankName, tankId])).toString();
+    final results = (await send_object(['HSET', primaryKey, tankName, tankId])).toString();
 
     return results == '1' || results == '0';
   }
@@ -102,6 +83,5 @@ class AuthenticationDatabase {
     return (await send_object(['HGET', primaryKey, tankName])).toString();
   }
 
-  Future<String> getNextGameId() async =>
-      (await send_object(['INCR', 'next_game_id'])).toString();
+  Future<String> getNextGameId() async => (await send_object(['INCR', 'next_game_id'])).toString();
 }

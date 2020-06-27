@@ -23,7 +23,7 @@
 
 <body style="display: flex; background-color: grey;">
 
-  <div id="login-card" class="mdc-card" style="margin: auto; padding: 10px; width: 350px;">
+  <div id="login-card" class="mdc-card" style="margin: auto; padding: 10px; width: 350px; display: none;">
     <div class="mdc-row" style="width: 100%;">
       <!-- Render textfield component -->
       <label class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField" style="width: 100%;">
@@ -160,36 +160,113 @@
   </div>
 
   <div id="play-card" class="mdc-card" style="display: none;">
+    <div>
+
+      <div style="display: flex;">
+        <div class="menu-button-container">
+          <button id="file-btn" class="mdc-button" data-mdc-auto-init="MDCRipple">
+            <div class="mdc-button__ripple"></div>
+            <span class="mdc-button__label">File</span>
+            <!-- <i class="material-icons mdc-button__icon" aria-hidden="true">
+              save
+            </i> -->
+            <div class="mdc-menu mdc-menu-surface" tabindex="-1" id="demo-menu">
+              <ul class="mdc-list" role="menu" aria-hidden="true" aria-orientation="vertical">
+                <!-- <li>
+                  <ul class="mdc-menu__selection-group">
+                    <li class="mdc-list-item" role="menuitem">
+                      <span class="mdc-menu__selection-group-icon">
+                        <i class="material-icons">check</i>
+                      </span>
+                      <span class="mdc-list-item__text">Single</span>
+                    </li>
+                    <li class="mdc-list-item" role="menuitem">
+                      <span class="mdc-menu__selection-group-icon">
+                        <i class="material-icons">check</i>
+                      </span>
+                      <span class="mdc-list-item__text">1.15</span>
+                    </li>
+                  </ul>
+                </li>
+                <li class="mdc-list-divider" role="separator"></li> -->
+                <li class="mdc-list-item" role="menuitem">
+                  <span class="mdc-list-item__text">New Tank</span>
+                </li>
+                <li class="mdc-list-item" role="menuitem">
+                  <span class="mdc-list-item__text">Open</span>
+                </li>
+                <li class="mdc-list-item" role="menuitem">
+                  <span class="mdc-list-item__text">Open Recent</span>
+                </li>              
+                <li class="mdc-list-divider" role="separator"></li>
+                <li class="mdc-list-item" role="menuitem">
+                  <span class="mdc-list-item__text">Make a Copy</span>
+                </li>
+                <li class="mdc-list-item" role="menuitem">
+                  <span class="mdc-list-item__text">Rename</span>
+                </li>
+                <li class="mdc-list-item" role="menuitem">
+                  <span class="mdc-list-item__text">Save As</span>
+                </li>                
+                <li class="mdc-list-item" role="menuitem">
+                  <span class="mdc-list-item__text">Save and Checkpoint</span>
+                </li>           
+                <li class="mdc-list-divider" role="separator"></li>         
+                <li class="mdc-list-item" role="menuitem">
+                  <span class="mdc-list-item__text">Revert to Checkpoint</span>
+                </li>   
+                <li class="mdc-list-divider" role="separator"></li>         
+                <li class="mdc-list-item" role="menuitem">
+                  <span class="mdc-list-item__text">Close File</span>
+                </li>   
+              </ul>
+            </div>
+          </button>
+          <!-- <button id="file-btn" class="mdc-button" data-mdc-auto-init="MDCRipple">File</button> -->
+
+        </div>
+
+
+        <button class="mdc-button" data-mdc-auto-init="MDCRipple">
+          <div class="mdc-button__ripple"></div>
+          <span class="mdc-button__label">Save</span>
+          <i class="material-icons mdc-button__icon" aria-hidden="true">
+            save
+          </i>
+        </button>
+        <button id="build-btn" class="mdc-button" data-mdc-auto-init="MDCRipple">
+          <div class="mdc-button__ripple"></div>
+          <span class="mdc-button__label">Build</span>
+          <i class="material-icons mdc-button__icon" aria-hidden="true">
+            save
+          </i>
+        </button>
+        <button id="run-btn" class="mdc-button" data-mdc-auto-init="MDCRipple" disabled>
+          <div class="mdc-button__ripple"></div>
+          <span class="mdc-button__label">Run</span>
+          <i class="material-icons mdc-button__icon" aria-hidden="true">
+            send
+          </i>
+        </button>
+      </div>
+    </div>
     <div class="left-window" style="height: 100%;">
       <div id="one" style="position: relative;">
 
-        <div style="display: flex;">
-          <button id="build-btn" class="mdc-button mdc-button--raised" style="margin-top: 5px; margin-right: 5px;">
-            <div class="mdc-button__ripple"></div>
-            <span class="mdc-button__label">Build</span>
-            <i class="material-icons mdc-button__icon" aria-hidden="true">
-              send
-            </i>
-          </button>
-          <button id="run-btn" class="mdc-button mdc-button--raised" style="margin-top: 5px; margin-right: 5px;"
-            disabled>
-            <div class="mdc-button__ripple"></div>
-            <span class="mdc-button__label">Run</span>
-            <i class="material-icons mdc-button__icon" aria-hidden="true">
-              send
-            </i>
-          </button>
-        </div>
-
-        <div id="editor" style="">
+        <div id="editor" style="height: 100%;
+        display: flex;
+        flex-direction: column;
+    ">
 
         </div>
       </div>
       <div id="two">
         <div class="right-window" style="height: 100%;">
           <div id="three">Three</div>
-          <div id="four" style="overflow: auto;">
-            <div id="log-output">
+          <div id="four" style="overflow: auto; background-color: black; color: white;">
+            <div id="log-output" style="display: flex;
+            flex-direction: column;
+            height: 100px;">
             </div>
           </div>
         </div>
@@ -231,11 +308,17 @@
       direction: 'vertical',
     });
 
-    // var editor = document.querySelector('#editor');
+    const rootEl = document.querySelector('.root');
+    const buttonEl = document.querySelector('#file-btn');
+    const menuEl = document.querySelector('.mdc-menu');
+    const menu = new mdc.menu.MDCMenu(menuEl);
+    buttonEl.addEventListener('click', (event) => {
+      menu.open = !menu.open;
 
-    // // var myCodeMirror = CodeMirror(editor, {
-    // //   mode: 'dart'
-    // // });
+      menu.setAnchorCorner(mdc.menu.Corner.BOTTOM_LEFT);
+      menu.setAnchorElement(buttonEl);
+    });
+
   </script>
 
 </body>

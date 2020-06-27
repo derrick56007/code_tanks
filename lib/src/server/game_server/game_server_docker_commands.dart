@@ -63,8 +63,7 @@ class GameServerDockerCommands {
   //   return jsonDecode(jsonString)[0]['IPAM']['Config'][0]['Gateway'];
   // }
 
-  static Future<void> runTankContainer(
-      String gameKey, String tankId
+  static Future<void> runTankContainer(String gameKey, String tankId
       // , String networkId
       ) async {
     final args = [
@@ -82,12 +81,11 @@ class GameServerDockerCommands {
 
     print('running docker create with args: $args');
     final process = await Process.start('docker', args, runInShell: true);
-    final lineStream =
-        process.stdout.transform(utf8Decoder).transform(lineSplitter);
+    final lineStream = process.stdout.transform(utf8Decoder).transform(lineSplitter);
 
     lineStream.listen((line) {
       print(line);
-     });
+    });
     // await process.stderr.drain();
 
     // return await process.exitCode;

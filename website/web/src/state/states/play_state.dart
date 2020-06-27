@@ -29,7 +29,7 @@ class PlayState extends State {
       ..on('run_done', (data) => onRunGameDone(data));
 
     editor = CodeMirror.fromElement(editorElement, options: options);
-
+    editor.setLineNumbers(true);
     editor.getDoc().setValue('''
 import 'code_tanks_api.dart';
 
@@ -47,6 +47,7 @@ class Custom extends BaseTank {
 }
 
 BaseTank createTank() => Custom();''');
+    editor.refresh();
   }
 
   void onBuildDone(data) {
@@ -94,11 +95,7 @@ BaseTank createTank() => Custom();''');
       final codeLang = 'dart'; // TODO fix placeholder
       final tankName = 'custom'; // TODO fix placeholder
 
-      final msg = {
-        'code': code,
-        'code_language': codeLang,
-        'tank_name': tankName
-      };
+      final msg = {'code': code, 'code_language': codeLang, 'tank_name': tankName};
 
       client.send('build_code', msg);
 
@@ -123,6 +120,7 @@ BaseTank createTank() => Custom();''');
     });
 
     editor.focus();
+    editor.refresh();
   }
 
   @override

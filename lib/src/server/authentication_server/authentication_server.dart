@@ -27,13 +27,8 @@ class AuthenticationServer extends BaseServer {
 
   bool builtDefaultTanks = false;
 
-  AuthenticationServer(
-      String address,
-      int port,
-      List<String> _gameServerAddresses,
-      List<String> _buildServerAddresses,
-      String redisAddress,
-      int redisPort)
+  AuthenticationServer(String address, int port, List<String> _gameServerAddresses, List<String> _buildServerAddresses,
+      String redisAddress, int redisPort)
       : authDb = AuthenticationDatabase(redisAddress, redisPort),
         super('authentication', address, port) {
     print('game server urls: $_gameServerAddresses');
@@ -54,13 +49,11 @@ class AuthenticationServer extends BaseServer {
     print('socket start ${req.connectionInfo.remoteAddress.address}');
 
     if (requestFromBuildServer(req)) {
-      socket.on(
-          'build_server_handshake', () => onBuildServerHandshake(req, socket));
+      socket.on('build_server_handshake', () => onBuildServerHandshake(req, socket));
     }
 
     if (requestFromGameServer(req)) {
-      socket.on(
-          'game_server_handshake', () => onGameServerHandshake(req, socket));
+      socket.on('game_server_handshake', () => onGameServerHandshake(req, socket));
     }
 
     // ..on('web_server_handshake', () => onWebServerHandshake(req, socket))
@@ -172,9 +165,7 @@ class AuthenticationServer extends BaseServer {
   }
 
   static bool isValidPassword(String password) {
-    return password != null &&
-        password.trim().isNotEmpty &&
-        password.toLowerCase() != 'null';
+    return password != null && password.trim().isNotEmpty && password.toLowerCase() != 'null';
   }
 
   Future<void> onRegister(ServerWebSocket socket, data) async {
@@ -201,8 +192,7 @@ class AuthenticationServer extends BaseServer {
     if (searchResults != 'null') {
       print('username $username already exists');
 
-      socket.send(
-          'register_failure', 'failed to register $username; username exists');
+      socket.send('register_failure', 'failed to register $username; username exists');
       return;
     }
 
@@ -221,8 +211,7 @@ class AuthenticationServer extends BaseServer {
     final salt = Salt.generateAsBase64String(saltLength);
     final hashedPassword = hashPassword(password, salt);
 
-    if (!(await authDb.registerUsernameWithHashedPassword(
-        nextUserId, username, hashedPassword))) {
+    if (!(await authDb.registerUsernameWithHashedPassword(nextUserId, username, hashedPassword))) {
       socket.send('register_failure', 'failed to register $username');
       return;
     }
@@ -289,8 +278,7 @@ class AuthenticationServer extends BaseServer {
     socket.send('login_successful');
   }
 
-  bool isLoggedIn(ServerWebSocket socket) =>
-      loggedInSockets.containsKey(socket);
+  bool isLoggedIn(ServerWebSocket socket) => loggedInSockets.containsKey(socket);
 
   String getUserIdFromSocket(ServerWebSocket socket) => loggedInSockets[socket];
 
@@ -426,8 +414,7 @@ class AuthenticationServer extends BaseServer {
 
     final hashedCodeUpload = hashCodeUpload(codeLang, code);
 
-    if ((await authDb.getCodeUploadUuid(hashedCodeUpload, codeLangWithCode)) !=
-        'null') {
+    if ((await authDb.getCodeUploadUuid(hashedCodeUpload, codeLangWithCode)) != 'null') {
       // uuid exists
       onAlreadyBuilt();
       return;
@@ -450,9 +437,7 @@ class AuthenticationServer extends BaseServer {
 // remove dispatch
       removeDispatches();
 
-      if ((await authDb.getCodeUploadUuid(
-              hashedCodeUpload, codeLangWithCode)) !=
-          'null') {
+      if ((await authDb.getCodeUploadUuid(hashedCodeUpload, codeLangWithCode)) != 'null') {
         // this means that before this build was completed, a duplicate code upload finished building first
         onAlreadyBuilt();
         return;
@@ -460,8 +445,7 @@ class AuthenticationServer extends BaseServer {
 
       onBuildSuccess(newUuid);
 
-      final saved = await authDb.saveCodeUploadHash(
-          hashedCodeUpload, codeLangWithCode, newUuid);
+      final saved = await authDb.saveCodeUploadHash(hashedCodeUpload, codeLangWithCode, newUuid);
 
       if (saved) {
         print('saved code upload hash');
