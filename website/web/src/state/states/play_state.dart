@@ -15,10 +15,7 @@ class PlayState extends State {
   final Element editorElement = querySelector('#editor');
   final Element logOutput = querySelector('#log-output');
 
-  final options = <String, String>{
-  'mode': 'javascript',
-  'theme': 'monokai'
-};
+  final options = <String, String>{'mode': 'javascript', 'theme': 'monokai'};
 
   CodeMirror editor;
 
@@ -27,14 +24,29 @@ class PlayState extends State {
 
   PlayState(ClientWebSocket client) : super(client) {
     client
-    ..on('log', (data) => onLogData(data))
-    ..on('build_done', (data) => onBuildDone(data));
+      ..on('log', (data) => onLogData(data))
+      ..on('build_done', (data) => onBuildDone(data))
+      ..on('run_done', (data) => onRunGameDone(data));
 
+    editor = CodeMirror.fromElement(editorElement, options: options);
 
- editor = CodeMirror.fromElement(
-    editorElement, options: options);
+    editor.getDoc().setValue('''
+import 'code_tanks_api.dart';
 
-editor.getDoc().setValue('foo.bar(1, 2, 3);');
+class Custom extends BaseTank {
+  @override
+  void onDetectRobot(DetectRobotEvent e) {
+    // TODO: implement onDetectRobot
+  }
+
+  @override
+  void tick() {
+    // TODO: implement tick
+  }
+  
+}
+
+BaseTank createTank() => Custom();''');
   }
 
   void onBuildDone(data) {
@@ -45,6 +57,14 @@ editor.getDoc().setValue('foo.bar(1, 2, 3);');
     if (success) {
       runBtn.disabled = false;
     }
+
+    buildBtn.disabled = false;
+  }
+
+  void onRunGameDone(data) {
+    // TODO validate data
+
+    runBtn.disabled = false;
 
     buildBtn.disabled = false;
   }
@@ -67,30 +87,42 @@ editor.getDoc().setValue('foo.bar(1, 2, 3);');
     playCard.style.display = '';
 
     buildBtnSub = buildBtn.onClick.listen((event) {
-      if (!buildBtn.disabled) {
-        final code = editor.getDoc().getValue();
-        final codeLang = 'dart'; // TODO fix placeholder
-        final tankName = 'custom'; // TODO fix placeholder
-
-        final msg = {
-          'code': code,
-          'code_language': codeLang,
-          'tank_name': tankName
-        };
-
-        client.send('build_code', msg);
+      if (buildBtn.disabled) {
+        return;
       }
+      final code = editor.getDoc().getValue();
+      final codeLang = 'dart'; // TODO fix placeholder
+      final tankName = 'custom'; // TODO fix placeholder
+
+      final msg = {
+        'code': code,
+        'code_language': codeLang,
+        'tank_name': tankName
+      };
+
+      client.send('build_code', msg);
 
       // buildBtn.blur();
       buildBtn.disabled = true;
     });
 
     runBtnSub = runBtn.onClick.listen((event) {
-      if (!runBtn.disabled) {}
+      if (runBtn.disabled) {
+        return;
+      }
+
+      final msg = {
+        'tank_names': ['custom']
+      };
+
+      client.send('run_game', msg);
 
       // runBtn.blur();
       runBtn.disabled = true;
+      buildBtn.disabled = true;
     });
+
+    editor.focus();
   }
 
   @override

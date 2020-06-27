@@ -3,11 +3,10 @@ import 'dart:io';
 
 import 'package:code_tanks/code_tanks_server_common.dart';
 
-import '../server_common/server_websocket.dart';
 import '../server_utils/utils.dart';
 import 'package:path/path.dart' as path;
 
-class DockerUtils {
+class BuildServerDockerCommands {
   static final utf8Decoder = Utf8Decoder();
   static final lineSplitter = LineSplitter();
 
@@ -27,8 +26,8 @@ class DockerUtils {
     final process = await Process.start('docker', args, runInShell: true);
 
     final lineStream = process.stdout
-        .transform(DockerUtils.utf8Decoder)
-        .transform(DockerUtils.lineSplitter);
+        .transform(BuildServerDockerCommands.utf8Decoder)
+        .transform(BuildServerDockerCommands.lineSplitter);
 
     final logPath = path.joinAll([fp, 'out', 'log']);
     final logFile = await File(logPath).create(recursive: true);
@@ -98,8 +97,8 @@ class DockerUtils {
     final process = await Process.start('docker', args, runInShell: true);
 
     final lineStream = process.stdout
-        .transform(DockerUtils.utf8Decoder)
-        .transform(DockerUtils.lineSplitter);
+        .transform(BuildServerDockerCommands.utf8Decoder)
+        .transform(BuildServerDockerCommands.lineSplitter);
 
     final logPath = path.joinAll([fp, 'out', 'push_log']);
     final logFile = await File(logPath).create(recursive: true);

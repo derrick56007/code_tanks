@@ -14,7 +14,7 @@ import '../authentication_server/authentication_database.dart';
 
 class AuthenticationServer extends BaseServer {
   static final _pbkdf2 = PBKDF2();
-  
+
   final gameServerAddresses = <String>[];
   final buildServerAddresses = <String>[];
 
@@ -51,15 +51,16 @@ class AuthenticationServer extends BaseServer {
 
   @override
   void handleSocketStart(HttpRequest req, ServerWebSocket socket) {
+    print('socket start ${req.connectionInfo.remoteAddress.address}');
+
     if (requestFromBuildServer(req)) {
-      socket
-        ..on('build_server_handshake',
-            () => onBuildServerHandshake(req, socket));
+      socket.on(
+          'build_server_handshake', () => onBuildServerHandshake(req, socket));
     }
 
     if (requestFromGameServer(req)) {
-      socket
-        ..on('game_server_handshake', () => onGameServerHandshake(req, socket));
+      socket.on(
+          'game_server_handshake', () => onGameServerHandshake(req, socket));
     }
 
     // ..on('web_server_handshake', () => onWebServerHandshake(req, socket))
@@ -67,7 +68,8 @@ class AuthenticationServer extends BaseServer {
       ..on('register', (data) => onRegister(socket, data))
       ..on('login', (data) => onLogin(socket, data))
       ..on('logout', () => onLogout(socket))
-      ..on('build_code', (data) => onBuildCode(socket, data));
+      ..on('build_code', (data) => onBuildCode(socket, data))
+      ..on('run_game', (data) => onRunGame(socket, data));
   }
 
   bool requestFromBuildServer(HttpRequest req) {
@@ -416,10 +418,10 @@ class AuthenticationServer extends BaseServer {
   static void defaultOnBuildLogPart(String line) {}
 
   void attemptBuildCode(String codeLang, String code,
-      {void onBuildSuccess(String tankUuid) = defaultOnBuildSuccess,
-      void onAlreadyBuilt() = defaultOnAlreadyBuilt,
-      void onBuildError() = defaultOnBuildError,
-      void onLog(String line) = defaultOnBuildLogPart}) async {
+      {void Function(String tankUuid) onBuildSuccess = defaultOnBuildSuccess,
+      void Function() onAlreadyBuilt = defaultOnAlreadyBuilt,
+      void Function() onBuildError = defaultOnBuildError,
+      void Function(String line) onLog = defaultOnBuildLogPart}) async {
     final codeLangWithCode = '$codeLang$code';
 
     final hashedCodeUpload = hashCodeUpload(codeLang, code);
@@ -503,5 +505,42 @@ class AuthenticationServer extends BaseServer {
 
   ServerWebSocket getAnyGameServer() {
     return gameServerSockets.keys.first;
+  }
+
+  void onRunGame(ServerWebSocket socket, data) async {
+    // TODO validate data
+    if (!isLoggedIn(socket)) {
+      return;
+    }
+
+    final tankNames = data['tank_names'];
+
+    final gameKeyToTankIds = <String, String>{};
+
+    final userId = getUserIdFromSocket(socket);
+
+    for (final tankName in tankNames) {
+      final tankId = await authDb.getTankIdFromTankName(userId, tankName);
+
+      if (tankId == 'null') {
+        print('failed getting tankId from tankname');
+        return;
+      }
+
+      String gameKey;
+
+      do {
+        gameKey = Utils.createRandomString(10);
+      } while (gameKeyToTankIds.containsKey(gameKey));
+
+      gameKeyToTankIds[gameKey] = tankId;
+    }
+
+    final nextGameId = await authDb.getNextGameId();
+
+    final gameServer = getAnyGameServer();
+
+    final msg = {'game_id': nextGameId, 'game_keys': gameKeyToTankIds};
+    gameServer.send('run_game', msg);
   }
 }

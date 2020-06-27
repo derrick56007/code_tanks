@@ -6,3 +6,4 @@ environment:
 
 dependencies:
  path: ^1.7.0
+ pedantic: any

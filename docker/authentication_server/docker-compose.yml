@@ -8,13 +8,13 @@ services:
     ports: 
       - 9897:9897
     environment: 
-      - GAME_SERVER_ADDRESSES=172.22.0.1
-      - BUILD_SERVER_ADDRESSES=172.22.0.1
-      - REGISTRY_SERVER_ADDRESSES=172.22.0.1
+      - GAME_SERVER_ADDRESSES=172.19.0.1
+      - BUILD_SERVER_ADDRESSES=172.19.0.1
       - PORT=9897
       - REDIS_ADDRESS=redis
     depends_on: 
       - redis
+      - code_tanks_registry
     command: ["/code_tanks/wait-for-it.sh", "redis:6379", "--", "/usr/bin/dart", "/code_tanks/bin/run_authentication_server.dart"]
 
   redis:
@@ -25,3 +25,9 @@ services:
     volumes: 
       - ./redis_config/redis.conf:/usr/local/etc/redis/redis.conf
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+
+  code_tanks_registry:
+    container_name: code_tanks_registry
+    image: registry:2.7.1
+    ports: 
+      - 5000:5000

@@ -2,8 +2,8 @@ FROM derrick56007/dart_dind
 
 WORKDIR /code_tanks
 
-RUN curl -fsSL https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh -o wait-for-it.sh
-RUN chmod 777 /code_tanks/wait-for-it.sh
+# RUN curl -fsSL https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh -o wait-for-it.sh
+# RUN chmod 777 /code_tanks/wait-for-it.sh
 
 COPY pubspec.* /code_tanks
 RUN pub get
@@ -15,6 +15,6 @@ RUN pub get --offline
 
 RUN chmod 777 /code_tanks/bin/run_build_server.dart
 
-# ENTRYPOINT ["/usr/bin/dart", "/code_tanks/bin/run_build_server.dart"]
+ENTRYPOINT ["/usr/bin/dart", "/code_tanks/bin/run_build_server.dart"]
 
 

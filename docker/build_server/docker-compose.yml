@@ -7,17 +7,16 @@ services:
       dockerfile: DockerfileBuildServer       
     ports:
       - 9898:9898
-      - 5000:5000
     environment: 
-      - AUTHENTICATION_SERVER_ADDRESS=192.168.1.98
+      - AUTHENTICATION_SERVER_ADDRESS=192.168.1.103 # change
       - AUTHENTICATION_SERVER_PORT=9897
       - PORT=9898
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    depends_on: 
-      - code_tanks_registry
-    command: ["/code_tanks/wait-for-it.sh", "code_tanks_registry:5000", "--", "/usr/bin/dart", "/code_tanks/bin/run_build_server.dart"]
+  #   depends_on: 
+  #     - code_tanks_registry
+  #   command: ["/code_tanks/wait-for-it.sh", "code_tanks_registry:5000", "--", "/usr/bin/dart", "/code_tanks/bin/run_build_server.dart"]
 
-  code_tanks_registry:
-    container_name: code_tanks_registry
-    image: registry:2.7.1
+  # code_tanks_registry:
+  #   container_name: code_tanks_registry
+  #   image: registry:2.7.1
