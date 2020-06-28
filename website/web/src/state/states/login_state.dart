@@ -80,8 +80,6 @@ class LoginState extends State {
   void _loginSuccessful() {
     print('successfully logged in');
 
-    // TODO save auth token
-
     StateManager.shared.pushState('play');
   }
 

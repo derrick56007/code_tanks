@@ -197,7 +197,7 @@
                 </li>
                 <li class="mdc-list-item" role="menuitem">
                   <span class="mdc-list-item__text">Open Recent</span>
-                </li>              
+                </li>
                 <li class="mdc-list-divider" role="separator"></li>
                 <li class="mdc-list-item" role="menuitem">
                   <span class="mdc-list-item__text">Make a Copy</span>
@@ -207,18 +207,18 @@
                 </li>
                 <li class="mdc-list-item" role="menuitem">
                   <span class="mdc-list-item__text">Save As</span>
-                </li>                
+                </li>
                 <li class="mdc-list-item" role="menuitem">
                   <span class="mdc-list-item__text">Save and Checkpoint</span>
-                </li>           
-                <li class="mdc-list-divider" role="separator"></li>         
+                </li>
+                <li class="mdc-list-divider" role="separator"></li>
                 <li class="mdc-list-item" role="menuitem">
                   <span class="mdc-list-item__text">Revert to Checkpoint</span>
-                </li>   
-                <li class="mdc-list-divider" role="separator"></li>         
+                </li>
+                <li class="mdc-list-divider" role="separator"></li>
                 <li class="mdc-list-item" role="menuitem">
                   <span class="mdc-list-item__text">Close File</span>
-                </li>   
+                </li>
               </ul>
             </div>
           </button>
@@ -285,39 +285,40 @@
 
   <!-- Instantiate single textfield component rendered in the document -->
   <script>
-    window.onload
+    window.addEventListener('load',
+      function () {
+        window.mdc.autoInit();
 
-    window.mdc.autoInit();
+        Split(['#one', '#two'], {
+          elementStyle: (dimension, size, gutterSize) => ({
+            'flex-basis': `calc(${size}% - ${gutterSize}px)`,
+          }),
+          gutterStyle: (dimension, gutterSize) => ({
+            'flex-basis': `${gutterSize}px`,
+          }),
+        });
 
-    Split(['#one', '#two'], {
-      elementStyle: (dimension, size, gutterSize) => ({
-        'flex-basis': `calc(${size}% - ${gutterSize}px)`,
-      }),
-      gutterStyle: (dimension, gutterSize) => ({
-        'flex-basis': `${gutterSize}px`,
-      }),
-    });
+        Split(['#three', '#four'], {
+          elementStyle: (dimension, size, gutterSize) => ({
+            'flex-basis': `calc(${size}% - ${gutterSize}px)`,
+          }),
+          gutterStyle: (dimension, gutterSize) => ({
+            'flex-basis': `${gutterSize}px`,
+          }),
+          direction: 'vertical',
+        });
 
-    Split(['#three', '#four'], {
-      elementStyle: (dimension, size, gutterSize) => ({
-        'flex-basis': `calc(${size}% - ${gutterSize}px)`,
-      }),
-      gutterStyle: (dimension, gutterSize) => ({
-        'flex-basis': `${gutterSize}px`,
-      }),
-      direction: 'vertical',
-    });
+        const rootEl = document.querySelector('.root');
+        const buttonEl = document.querySelector('#file-btn');
+        const menuEl = document.querySelector('.mdc-menu');
+        const menu = new mdc.menu.MDCMenu(menuEl);
+        buttonEl.addEventListener('click', (event) => {
+          menu.open = !menu.open;
 
-    const rootEl = document.querySelector('.root');
-    const buttonEl = document.querySelector('#file-btn');
-    const menuEl = document.querySelector('.mdc-menu');
-    const menu = new mdc.menu.MDCMenu(menuEl);
-    buttonEl.addEventListener('click', (event) => {
-      menu.open = !menu.open;
-
-      menu.setAnchorCorner(mdc.menu.Corner.BOTTOM_LEFT);
-      menu.setAnchorElement(buttonEl);
-    });
+          menu.setAnchorCorner(mdc.menu.Corner.BOTTOM_LEFT);
+          menu.setAnchorElement(buttonEl);
+        });
+      }, false);
 
   </script>
 

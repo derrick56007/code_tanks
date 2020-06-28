@@ -1,19 +1,19 @@
-import 'package:code_tanks/code_tanks_server_common.dart';
-import 'package:code_tanks/src/server/game_server/game_server_docker_commands.dart';
-import 'package:quiver/collection.dart';
+import 'package:code_tanks/code_tanks_entity_component_system.dart';
 
 void main() async {
-  // final address = '0.0.0.0';
-  // final port = 9897;
+  var derp = {'a': {'1', '2'}};
 
-  // final socket = DummySocket('ws://$address:$port');
-  // await socket.start();
-  // await socket.done;
+  final d = derp['a'];
+  d.add('7');
 
-    // var a = TreeSet<String>();
-    // a.add('derp');
+  print(derp['a']);
 
-    // print(a.lookup('dep'));
-
-  print(await GameServerDockerCommands.getNetworkIp('my-network3'));
 }
+
+class Derp {
+  int a = 0;
+}
+
+
+
+
