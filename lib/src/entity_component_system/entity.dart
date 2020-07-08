@@ -13,5 +13,7 @@ class Entity {
     componentTypeToComponent[component.runtimeType] = component;
   }
 
+  void addAll(Iterable<Component> components) => components.forEach((component) => addComponent);
+
   Component getComponent(Type componentType) => componentTypeToComponent[componentType];
 }

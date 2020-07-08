@@ -49,18 +49,18 @@ class AuthenticationServer extends BaseServer {
     print('socket start ${req.connectionInfo.remoteAddress.address}');
 
     if (requestFromBuildServer(req)) {
-      socket.on('build_server_handshake', () => onBuildServerHandshake(req, socket));
+      socket.on('build_server_handshake', (_) => onBuildServerHandshake(req, socket));
     }
 
     if (requestFromGameServer(req)) {
-      socket.on('game_server_handshake', () => onGameServerHandshake(req, socket));
+      socket.on('game_server_handshake', (_) => onGameServerHandshake(req, socket));
     }
 
     // ..on('web_server_handshake', () => onWebServerHandshake(req, socket))
     socket
       ..on('register', (data) => onRegister(socket, data))
       ..on('login', (data) => onLogin(socket, data))
-      ..on('logout', () => onLogout(socket))
+      ..on('logout', (_) => onLogout(socket))
       ..on('build_code', (data) => onBuildCode(socket, data))
       ..on('run_game', (data) => onRunGame(socket, data));
   }
@@ -433,7 +433,7 @@ class AuthenticationServer extends BaseServer {
         ..removeDispatch('push_code_log_part_$newUuid');
     }
 
-    Future<void> _handleSuccess() async {
+    Future<void> _handleSuccess(_) async {
 // remove dispatch
       removeDispatches();
 
@@ -454,20 +454,27 @@ class AuthenticationServer extends BaseServer {
       }
     }
 
-    void _handleError() {
+    void _handleError(_) {
       // remove dispatch
       removeDispatches();
 
       onBuildError();
     }
 
-    void _handleBuildLog(String line) {
+    void _handleBuildLog(dynamic data) {
+      // TODO validate data
+
+      final line = data['line'];
+
       print('build_code_log_part_$newUuid: $line');
 
       onLog(line);
     }
 
-    void _handlePushLog(String line) {
+    void _handlePushLog(dynamic data) {
+      // TODO validate data
+      final line = data['line'];
+
       print('push_code_log_part_$newUuid: $line');
 
       onLog(line);

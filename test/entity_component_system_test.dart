@@ -13,8 +13,8 @@ void main() async {
 
   // print(a.lookup('dep'));
   final world = World();
-  world.addSystem(ASystem());
   world.addSystem(ACSystem());
+  world.addSystem(ASystem());
 
   final entityA = world.createEntity();
   entityA.addComponent(AComponent());
@@ -31,7 +31,10 @@ void main() async {
   entityABC.addComponent(BComponent());  
   entityABC.addComponent(CComponent());  
 
-  world.update();
+  print(world.idToEntity);
+
+  await world.updateAsync();
+  await world.updateAsync();
 }
 
 class AComponent extends Component {
@@ -50,10 +53,11 @@ class ASystem extends System {
   ASystem() : super({AComponent});
 
   @override
-  void process(Entity entity) {
+  Future<void> process(Entity entity) async {
     AComponent aComp = entity.getComponent(AComponent);
 
-    print('entity.a val ${aComp.a}');
+    print('entity.a val ff ${aComp.a}');
+    return;
   }
 }
 
@@ -61,12 +65,13 @@ class ACSystem extends System {
   ACSystem() : super({AComponent, CComponent});
 
   @override
-  void process(Entity entity) {
+  Future<void> process(Entity entity) async {
     AComponent aComp = entity.getComponent(AComponent);
     CComponent cComp = entity.getComponent(CComponent);
 
     print('entity.a val ${aComp.a}');
     print('entity.c val ${cComp.c}');
+    return;
   }
 }
 

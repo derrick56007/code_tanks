@@ -15,7 +15,7 @@ class LoginState extends State {
   StreamSubscription submitSub;
 
   LoginState(ClientWebSocket client) : super(client) {
-    client.onClose.listen((_) => _logoutSuccessful());
+    client.onClose.listen(_logoutSuccessful);
 
     client
       ..on('login_successful', _loginSuccessful)
@@ -77,13 +77,13 @@ class LoginState extends State {
     client.send('login', loginInfo);
   }
 
-  void _loginSuccessful() {
+  void _loginSuccessful(_) {
     print('successfully logged in');
 
     StateManager.shared.pushState('play');
   }
 
-  void _logoutSuccessful() {
+  void _logoutSuccessful(_) {
     StateManager.shared.pushState('login');
 
     querySelector('#friends-list').children.clear();

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:code_tanks/code_tanks_server_common.dart';
 import 'package:code_tanks/src/server/game_server/game_server_docker_commands.dart';
 import 'package:code_tanks/src/server/server_utils/utils.dart';
+import 'package:quiver/collection.dart';
 
 import '../server_common/dummy_server.dart';
 import 'logic/game.dart';
@@ -14,14 +15,17 @@ class GameServer extends DummyServer {
   // address to name
   // final gameAddressToGameInstance = <String, Game>{};
   // final gameKeyToGameAddress = <String, String>{};
-  final gameKeyToGameInstance = <String, Game>{};
-  final socketToGameInstance = <ServerWebSocket, Game>{};
+  final gameIdToGameInstance = BiMap<String, Game>();
+  final gameKeyToGameId = BiMap<String, String>();
+
+  BiMap<String, ServerWebSocket> get gameKeyToSocket => socketToGameKey.inverse;
+
+  final socketToGameKey = BiMap<ServerWebSocket, String>();
 
   HttpServer server;
   StreamSubscription<HttpRequest> sub;
 
-  GameServer(this.address, this.port, String authenticationServerAddress,
-      int authenticationServerPort)
+  GameServer(this.address, this.port, String authenticationServerAddress, int authenticationServerPort)
       : super('game', authenticationServerAddress, authenticationServerPort);
 
   @override
@@ -58,11 +62,15 @@ class GameServer extends DummyServer {
   }
 
   void handleSocketDone(HttpRequest req, ServerWebSocket socket) {
-    final game = socketToGameInstance[socket];
+    final gameKey = socketToGameKey[socket];
+    final gameId = gameKeyToGameId[gameKey];
+    final game = gameIdToGameInstance[gameId];
 
     if (game != null) {
-      game.onTankDisconnect(socket);
+      game.onTankDisconnect(gameKey);
     }
+
+    socketToGameKey.remove(socket);
   }
 
   Future close() async {
@@ -72,18 +80,31 @@ class GameServer extends DummyServer {
   }
 
   void handleSocketStart(HttpRequest req, ServerWebSocket socket) {
-    socket.on('game_instance_handshake',
-        (data) => onGameInstanceHandshake(req, data, socket));
+    socket //
+    ..on('game_instance_handshake', (data) => onGameInstanceHandshake(req, data, socket))
+    ..on('game_event', (data) => onPlayerEvent);
   }
 
-  void onGameInstanceHandshake(HttpRequest req, data, ServerWebSocket socket) {
+  void onPlayerEvent(Map data) {
+    final gameKey = data['game_key'];
+    final gameId = gameKeyToGameId[gameKey];
+    final game = gameIdToGameInstance[gameId];
+
+    final event = data['event'];
+
+    // TODO validate events
+
+    game.onPlayerEvent(gameKey, event);
+  }
+
+  void onGameInstanceHandshake(HttpRequest req, Map data, ServerWebSocket socket) {
     // TODO validate data
 
     final gameKey = data['game_key'];
 
     print('game key $gameKey');
 
-    if (!isValidGameKey(gameKey) || socketToGameInstance.containsKey(socket)) {
+    if (!isValidGameKey(gameKey) || socketToGameKey.containsKey(socket)) {
       print('game instance handshake failure');
 
       return;
@@ -91,18 +112,19 @@ class GameServer extends DummyServer {
     // final address = gameKeyToGameAddress.remove(gameKey);
 
     // final game = gameAddressToGameInstance[address];
-    final game = gameKeyToGameInstance[gameKey];
+    final gameId = gameKeyToGameId[gameKey];
+    final game = gameIdToGameInstance[gameId];
 
-    socketToGameInstance[socket] = game;
+    socketToGameKey[socket] = gameKey;
 
-    game.addTank(socket, gameKey);
+    game.addTankAndStartGameIfAllTanksInGame(gameKey, socket);
     print('game instance handshake success');
   }
 
   bool isValidGameKey(String gameKey) {
     // final address = req.connectionInfo.remoteAddress.address;
 
-    return gameKeyToGameInstance.containsKey(gameKey);
+    return gameKeyToGameId.containsKey(gameKey);
   }
 
   // bool requestFromGameInstance(HttpRequest req) {
@@ -111,7 +133,7 @@ class GameServer extends DummyServer {
   //   return gameAddressToGameInstance.containsKey(address);
   // }
 
-  void onRunGame(data) async {
+  void onRunGame(Map data) async {
     // TODO validate data
 
     // final tankIds = data['tank_ids'];
@@ -126,27 +148,14 @@ class GameServer extends DummyServer {
       }
     }
 
-    // String networkId;
-
-    // do {
-    //   networkId = Utils.createRandomString(10);
-    // } while (
-    //     (await GameServerDockerCommands.createDockerNetwork(networkId)) != 0);
-
-    // final address = await GameServerDockerCommands.getNetworkIp(networkId);
-
-    // for (final gameKey in gameKeyToTankIds.keys) {
-    //   gameKeyToGameAddress[gameKey] = address;
-    // }
-
     final gameId = data['game_id'];
 
-    final game = Game(address, gameId, gameKeyToTankIds.keys.toList());
+    gameIdToGameInstance[gameId] = Game(gameId, gameKeyToTankIds.keys.toList());
 
     for (final gameKey in gameKeyToTankIds.keys) {
       final tankId = gameKeyToTankIds[gameKey];
 
-      gameKeyToGameInstance[gameKey] = game;
+      gameKeyToGameId[gameKey] = gameId;
 
       await GameServerDockerCommands.runTankContainer(gameKey, tankId);
     }

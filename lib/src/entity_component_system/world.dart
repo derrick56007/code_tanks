@@ -21,26 +21,28 @@ class World {
     componentTypeToIdSet[componentType].add(entityId);
   }
 
-  void update() {
+  Future<void> updateAsync() async {
     for (final system in systems) {
       final sortedIds = getSortedIdsForEntitiesWithComponentTypes(system.componentTypes);
       for (final id in sortedIds) {
-        system.process(idToEntity[id]);
+        await system.process(idToEntity[id]);
       }
     }
   }
 
   List<int> getSortedIdsForEntitiesWithComponentTypes(Set<Type> componentTypes) {
+
     final idSetsForCorrespondingComponentTypes = componentTypes.map((type) => componentTypeToIdSet[type]).toList();
 
-    final ids = intersectionBetweenAllSets(idSetsForCorrespondingComponentTypes).toList();
+    final ids = intersectionBetweenAllSets(idSetsForCorrespondingComponentTypes).toList().cast<int>();
+    
     return ids..sort();
   }
 
   static Set intersectionBetweenAllSets(List<Set> sets) {
-    if (sets.length == 1) {
-      return sets.first;
-    }
+    if (sets.isEmpty) return {};
+    
+    if (sets.length == 1) return sets.first;
 
     var currentSet = sets.first;
 
@@ -52,6 +54,7 @@ class World {
   }
 
   void addSystem(System system) {
+    print('adding system $system');
     systems.add(system);
   }
 }

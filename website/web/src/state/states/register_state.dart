@@ -80,13 +80,13 @@ class RegisterState extends State {
     client.send('register', loginInfo);
   }
 
-  void _registerSuccessful() {
+  void _registerSuccessful(_) {
     print('register successful');
 
     StateManager.shared.pushState('login');
   }
 
-  void _registerFailure(data) {
+  void _registerFailure(Map data) {
     print('register failure = $data');
   }
 }

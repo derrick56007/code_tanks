@@ -5,5 +5,5 @@ abstract class System {
 
   System(this.componentTypes);
 
-  void process(Entity entity);
+  Future<void> process(Entity entity);
 }
