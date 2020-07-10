@@ -1,5 +1,4 @@
 import 'package:code_tanks/src/server/game_server/logic/components/collision/kd_tree.dart';
-import 'package:code_tanks/src/server/game_server/logic/components/collision/physics_component.dart';
 import 'package:code_tanks/src/server/game_server/logic/components/collision/vector_2d.dart';
 import 'package:code_tanks/src/server/server_utils/tuple.dart';
 import 'package:test/test.dart';

@@ -1,5 +1,4 @@
 import 'package:code_tanks/src/common/test_socket.dart';
-import 'package:code_tanks/src/server/game_server/logic/game.dart';
 import 'package:test/test.dart';
 
 void main() {

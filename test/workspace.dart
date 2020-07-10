@@ -1,4 +1,3 @@
-import 'package:code_tanks/code_tanks_entity_component_system.dart';
 
 void main() async {
   var derp = [0, 1, 2];

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:path/path.dart' as path;
-import 'package:quiver/async.dart';
 
 class Utils {
 static final chars = 'abcdefghijklmnopqrstuvwxyz0123456789'.codeUnits;
