@@ -3,9 +3,7 @@ import 'dart:io';
 
 import 'package:code_tanks/code_tanks_server_common.dart';
 import 'package:code_tanks/src/server/game_server/game_server_docker_commands.dart';
-import 'package:code_tanks/src/server/game_server/logic/components/render_component.dart';
 import 'package:code_tanks/src/server/game_server/logic/systems/render_system.dart';
-import 'package:code_tanks/src/server/server_utils/utils.dart';
 
 import '../server_common/dummy_server.dart';
 import 'logic/game.dart';
