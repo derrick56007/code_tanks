@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html style="overflow: hidden;">
 
 <head>
   <meta charset="utf-8">
@@ -162,8 +162,8 @@
   <div id="play-card" class="mdc-card" style="display: none;">
     <div>
 
-      <div style="display: flex;">
-        <div class="menu-button-container">
+      <div style="display: flex; position: relative;" class="mdc-elevation--z3">
+        <div class="menu-button-container"> 
           <button id="file-btn" class="mdc-button" data-mdc-auto-init="MDCRipple">
             <div class="mdc-button__ripple"></div>
             <span class="mdc-button__label">File</span>
@@ -251,19 +251,18 @@
       </div>
     </div>
     <div class="left-window" style="height: 100%;">
-      <div id="one" style="position: relative;">
+      <div id="one" style="position: relative; overflow: hidden;">
 
         <div id="editor" style="height: 100%;
         display: flex;
-        flex-direction: column;
-    ">
+        flex-direction: column;">
 
         </div>
       </div>
-      <div id="two">
+      <div id="two" style="overflow: hidden;">
         <div class="right-window" style="height: 100%;">
-          <div id="three">Three</div>
-          <div id="four" style="overflow: auto; background-color: black; color: white;">
+          <div id="three" style="overflow: hidden;">Three</div>
+          <div id="four" class="custom-scroll" style="overflow: auto; background-color: black; color: white;">
             <div id="log-output" style="display: flex;
             flex-direction: column;
             height: 100px;">
