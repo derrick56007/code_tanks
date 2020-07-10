@@ -6,7 +6,6 @@ import 'package:code_tanks/src/server/game_server/game_server_docker_commands.da
 import 'package:code_tanks/src/server/game_server/logic/components/render_component.dart';
 import 'package:code_tanks/src/server/game_server/logic/systems/render_system.dart';
 import 'package:code_tanks/src/server/server_utils/utils.dart';
-import 'package:quiver/collection.dart';
 
 import '../server_common/dummy_server.dart';
 import 'logic/game.dart';
@@ -14,15 +13,11 @@ import 'logic/game.dart';
 class GameServer extends DummyServer {
   final String address;
   final int port;
-  // address to name
-  // final gameAddressToGameInstance = <String, Game>{};
-  // final gameKeyToGameAddress = <String, String>{};
-  final gameIdToGameInstance = BiMap<String, Game>();
-  final gameKeyToGameId = BiMap<String, String>();
 
-  BiMap<String, ServerWebSocket> get gameKeyToSocket => socketToGameKey.inverse;
+  final gameIdToGameInstance = <String, Game>{};
+  final gameKeyToGameId = <String, String>{};
 
-  final socketToGameKey = BiMap<ServerWebSocket, String>();
+  final socketToGameKey = <ServerWebSocket, String>{};
 
   HttpServer server;
   StreamSubscription<HttpRequest> sub;
@@ -98,9 +93,7 @@ class GameServer extends DummyServer {
 
       return;
     }
-    // final address = gameKeyToGameAddress.remove(gameKey);
 
-    // final game = gameAddressToGameInstance[address];
     final gameId = gameKeyToGameId[gameKey];
     final game = gameIdToGameInstance[gameId];
 
@@ -108,8 +101,6 @@ class GameServer extends DummyServer {
 
     game.addTank(gameKey, socket);
     print('game instance handshake success');
-    // authenticationSocket.on('derp', (_) => print('terp'));
-    // socket.send('derp');
 
     if (game.allTanksInGame()) {
       await game.startGame();
@@ -117,30 +108,17 @@ class GameServer extends DummyServer {
       RenderSystem renderSys = game.world.getSystemByType(RenderSystem);
       final allFrames = renderSys.frames.map((frame) => frame.toList()).toList(growable: false);
 
-      final msg = {
-        'frames': allFrames
-      };
+      final msg = {'frames': allFrames};
 
       authenticationSocket.send('run_game_response_$gameId', msg);
     }
   }
 
-  bool isValidGameKey(String gameKey) {
-    // final address = req.connectionInfo.remoteAddress.address;
-
-    return gameKeyToGameId.containsKey(gameKey);
-  }
-
-  // bool requestFromGameInstance(HttpRequest req) {
-  //   final address = req.connectionInfo.remoteAddress.address;
-
-  //   return gameAddressToGameInstance.containsKey(address);
-  // }
+  bool isValidGameKey(String gameKey) => gameKeyToGameId.containsKey(gameKey);
 
   void onRunGame(data) async {
     // TODO validate data
 
-    // final tankIds = data['tank_ids'];
     final gameKeyToTankIds = data['game_keys'];
 
     for (final tankId in gameKeyToTankIds.values) {

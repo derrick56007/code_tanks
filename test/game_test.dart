@@ -2,9 +2,9 @@ import 'package:code_tanks/src/common/test_socket.dart';
 import 'package:code_tanks/src/server/game_server/logic/components/game_command/game_commands_component.dart';
 import 'package:code_tanks/src/server/game_server/logic/game.dart';
 import 'package:test/test.dart';
-import '../assets/dart/run.dart' as dart_run;
 
-import '../assets/dart/code_tanks_api.dart';
+import 'package:code_tanks/code_tanks_dart_api.dart';
+
 
 class Custom extends BaseTank {
   @override
@@ -44,7 +44,7 @@ void main() {
 
       for (final key in gameKeys) {
         final socket = TestSocket();
-        dart_run.handleSocketAndBot(socket, Custom());
+        handleSocketAndBot(socket, Custom());
         game.addTank(key, socket);
       }
     });

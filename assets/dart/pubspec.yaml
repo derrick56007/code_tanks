@@ -1,9 +1,11 @@
-name: code_tanks
+name: custom_code_tank
 description: My script for code tanks
 
 environment:
   sdk: '>=2.8.1 <3.0.0'
 
 dependencies:
- path: ^1.7.0
- pedantic: any
+  path: ^1.7.0
+  pedantic: any 
+  code_tanks:
+    path: ../../

@@ -122,7 +122,7 @@ BaseTank createTank() => Custom();''');
       }
 
       final msg = {
-        'tank_names': ['custom']
+        'tank_names': ['custom', 'custom']
       };
 
       client.send('run_game', msg);

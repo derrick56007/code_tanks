@@ -1,17 +1,13 @@
-// this is a temp file
+// this is a placeholder file
 
-import 'code_tanks_api.dart';
+import 'package:code_tanks/code_tanks_dart_api.dart';
 
 class Custom extends BaseTank {
   @override
-  void run() {
-    // TODO: implement run
-  }
+  void run() {}
 
   @override
-  void onScanTank(ScanTankEvent e) {
-    // TODO: implement onDetectRobot
-  }
+  void onScanTank(ScanTankEvent e) {}
 }
 
 BaseTank createTank() => Custom();
