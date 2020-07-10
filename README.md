@@ -1,3 +1,4 @@
+![Dart CI](https://github.com/Derrick56007/code_tanks/workflows/Dart%20CI/badge.svg)
 A library for Dart developers.
 
 Created from templates made available by Stagehand under a BSD-style
