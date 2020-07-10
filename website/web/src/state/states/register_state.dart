@@ -86,7 +86,7 @@ class RegisterState extends State {
     StateManager.shared.pushState('login');
   }
 
-  void _registerFailure(Map data) {
+  void _registerFailure(data) {
     print('register failure = $data');
   }
 }

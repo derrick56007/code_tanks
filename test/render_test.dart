@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:code_tanks/src/common/test_socket.dart';
 import 'package:code_tanks/src/server/game_server/logic/components/game_command/game_commands_component.dart';
 import 'package:code_tanks/src/server/game_server/logic/game.dart';
+import 'package:code_tanks/src/server/game_server/logic/systems/render_system.dart';
 import 'package:test/test.dart';
 import '../assets/dart/run.dart' as dart_run;
 
@@ -50,30 +53,22 @@ void main() {
     });
 
     test('first test', () async {
+      RenderSystem renderSystem = game.world.getSystemByType(RenderSystem);
+
+      expect(renderSystem.frames.length, 0);
+
       await game.world.updateAsync();
 
-      for (final entity in game.world.idToEntity.values) {
-        GameCommandsComponent pComp = entity.getComponent(GameCommandsComponent);
-      
-        expect(pComp.commandQueue.length, 11);
-      }
-    });
+      expect(renderSystem.frames.length, 1);
 
-    test('second test', () async {
-      for (var i = 0; i < 10; i++) {
-        await game.world.updateAsync();
-      }
-      for (final entity in game.world.idToEntity.values) {
-        GameCommandsComponent pComp = entity.getComponent(GameCommandsComponent);
-      
-        expect(pComp.commandQueue.length, 0);
-      }      
       await game.world.updateAsync();
-      for (final entity in game.world.idToEntity.values) {
-        GameCommandsComponent pComp = entity.getComponent(GameCommandsComponent);
-      
-        expect(pComp.commandQueue.length, 11);
-      }      
+
+      expect(renderSystem.frames.length, 2);
+
+      await game.world.updateAsync();
+
+      expect(renderSystem.frames.length, 3);
+      expect(renderSystem.frames[0].renderables.length, 3);            
     });
 
     tearDown(() {

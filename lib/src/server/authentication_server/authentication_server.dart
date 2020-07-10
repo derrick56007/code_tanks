@@ -532,6 +532,15 @@ class AuthenticationServer extends BaseServer {
     final gameServer = getAnyGameServer();
 
     final msg = {'game_id': nextGameId, 'game_keys': gameKeyToTankIds};
+
+    void onRunGameDone(data) {
+      print('received frames');
+      socket.send('run_game_response', data);
+    }
+
+    final runGameDone = gameServer.onSingleAsync('run_game_response_$nextGameId', onRunGameDone);
     gameServer.send('run_game', msg);
+
+    await runGameDone;
   }
 }

@@ -3,7 +3,9 @@ abstract class BaseTank {
 
   void run();
 
-  void onDetectRobot(DetectRobotEvent e);
+  void onScanTank(ScanTankEvent e) {}
+
+  void onHitByBulletEvent(HitByBulletEvent e) {}
 
   void ahead(int amount) {
     _createAndAddCommandWithArgument('ahead', amount);
@@ -70,4 +72,16 @@ abstract class BaseTank {
   }
 }
 
-abstract class DetectRobotEvent {}
+abstract class GameEvent {}
+
+class ScanTankEvent extends GameEvent {
+  ScanTankEvent.internal();
+
+  factory ScanTankEvent.fromMap(Map map) => ScanTankEvent.internal();
+}
+
+class HitByBulletEvent extends GameEvent {
+  HitByBulletEvent.internal();
+
+  factory HitByBulletEvent.fromMap(Map map) => HitByBulletEvent.internal();  
+}

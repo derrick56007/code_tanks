@@ -7,15 +7,26 @@ import 'code_tanks_api.dart';
 
 class Custom extends BaseTank {
   @override
-  void onDetectRobot(DetectRobotEvent e) {
-    // TODO: implement onDetectRobot
+  void run() {
+    setRadarToRotateWithGun(true);
+
+    ahead(2);
+    rotateGun(2);
+    back(2);
+    setRotateRadar(2);
+
+    setRotateGun(2);
+    ahead(2);
   }
 
   @override
-  void tick() {
-    // TODO: implement tick
+  void onScanTank(ScanTankEvent e) {
+    back(2);
+    setRotateRadar(2);
+
+    setRotateGun(2);
+    ahead(2);
   }
-  
 }
 
 BaseTank createTank() => Custom();

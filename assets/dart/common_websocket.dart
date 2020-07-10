@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 abstract class CommonWebSocket {
@@ -5,12 +6,15 @@ abstract class CommonWebSocket {
   static const messageIndex = 1;
   static const defaultLength = 2;
 
-  final dispatchers = <String, Function>{};
+  final dispatchers = <String, void Function(dynamic data)>{};
+
+  final singleDispatchCompleters = <String, Completer>{};
+
   Future done;
 
   Future start();
 
-  void on(String type, Function function) {
+  void on(String type, void Function(dynamic data) function) {
     if (dispatchers.containsKey(type)) {
       print(CTError('Overriding dispatch $type'));
     }
@@ -18,15 +22,38 @@ abstract class CommonWebSocket {
     dispatchers[type] = function;
   }
 
-  bool removeDispatch(String type) {
+  Future onSingleAsync(String type, void Function(dynamic data) function) {
+    singleDispatchCompleters[type] = Completer();
+
+    void runOnceFunction(dynamic data) {
+      // remove single dispatch
+
+      singleDispatchCompleters[type].complete();
+
+      removeSingleDispatch(type);
+
+      function(data);
+    }
+
+    on(type, runOnceFunction);
+
+    return singleDispatchCompleters[type].future;
+  }
+
+  void removeDispatch(String type) {
     print('removing dispatch $type');
-    return  dispatchers.remove(type) != null;
+    dispatchers.remove(type);
+  }
+
+  void removeSingleDispatch(String type) {
+    removeDispatch(type);
+
+    singleDispatchCompleters.remove(type);
   }
 
   void send(String type, [message]);
 
-  void onData(d) {
-    final data = jsonDecode(d);
+  void onDecodedData(data) {
 
     if (data is List && data.length == defaultLength) {
       // check if dispatch exists
@@ -50,11 +77,17 @@ abstract class CommonWebSocket {
         print('No such dispatch exists!: $type');
         return;
       }
-      dispatchers[type]();
+      dispatchers[type]({});
       return;
     }
 
     print('No such dispatch exists!: $data');
+  }
+
+  void onData(d) {
+    final data = jsonDecode(d);
+
+    onDecodedData(data);
   }
 }
 

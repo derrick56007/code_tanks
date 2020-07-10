@@ -1,9 +1,11 @@
 class Tuple<T,A> {
-  final T first;
-  final A second;
+  T first;
+  A second;
 
-  const Tuple(this.first, this.second);
+  Tuple(this.first, this.second);
 
   @override
   String toString() => '($first, $second)';
+
+  Tuple<T,A> copy() => Tuple<T,A>(first, second);
 }

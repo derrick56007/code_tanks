@@ -2,11 +2,9 @@ import 'dart:io';
 
 import 'dummy_socket.dart';
 import 'custom.dart' as custom;
-import 'common_websocket.dart';
 import 'code_tanks_api.dart';
 
 void main() async {
-
   final gameKey = Platform.environment['GAME_KEY'];
 
   // TODO replace with game server address
@@ -20,27 +18,48 @@ void main() async {
   print('game instance connecting to $url');
 
   await socket.start();
-  print('game instance connected');  
+  print('game instance connected');
 
   final data = {'game_key': gameKey};
   socket.send('game_instance_handshake', data);
 }
 
-void handleSocketAndBot(socket, BaseTank bot) {
+final nameToEventGenerator = <String, GameEvent Function(Map)>{
+  'scan_tank_event': (Map map) => ScanTankEvent.fromMap(map),
+  'hit_by_bullet_event': (Map map) => HitByBulletEvent.fromMap(map),
+};
 
-  void onUpdateRequest(_) {
-    print('received update request');
-    bot.run();
-    final msg = { 'commands': bot.currentCommands };
-    socket.send('update_response', msg);
+void handleSocketAndBot(socket, BaseTank bot) {
+  void sendAndClearCommands(String msgType) {
+    final msg = {'commands': bot.currentCommands};
+    socket.send(msgType, msg);
     bot.currentCommands.clear();
   }
 
-  void onEvent(data) {
+  void onRunGameCommandsRequest(_) {
+    // print('received run_game_commands_request');
+    bot.run();
+    sendAndClearCommands('run_game_commands_response');
+  }
 
+  final dispatchToRespectiveEventHandler = <Type, Function>{
+    ScanTankEvent: (ScanTankEvent e) => bot.onScanTank(e),
+    HitByBulletEvent: (HitByBulletEvent e) => bot.onHitByBulletEvent(e)
+  };
+
+  void onEventCommandsRequest(data) {
+    print('received event_commands_request');
+
+    // TODO validate data
+    final eventName = data['event_name'];
+    final gameEvent = nameToEventGenerator[eventName](data);
+
+    dispatchToRespectiveEventHandler[gameEvent.runtimeType](gameEvent);
+    sendAndClearCommands('event_commands_response');
   }
 
   socket //
-    ..on('update_request', onUpdateRequest)
-    ..on('event', onEvent);  
+    // ..on('derp', (_) => socket.send('derp'))
+    ..on('run_game_commands_request', onRunGameCommandsRequest)
+    ..on('event_commands_request', onEventCommandsRequest);
 }

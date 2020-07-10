@@ -9,7 +9,7 @@ class Custom extends BaseTank {
   }
 
   @override
-  void onDetectRobot(DetectRobotEvent e) {
+  void onScanTank(ScanTankEvent e) {
     // TODO: implement onDetectRobot
   }
 }

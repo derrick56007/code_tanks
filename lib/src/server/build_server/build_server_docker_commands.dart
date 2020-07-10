@@ -105,7 +105,7 @@ class BuildServerDockerCommands {
     final logFile = await File(logPath).create(recursive: true);
 
     await for (final line in lineStream) {
-      socket.send('push_code_log_part_$uuid', line);
+      socket.send('push_code_log_part_$uuid', {'line': line});
       await logFile.writeAsString(line + '\n', mode: FileMode.append);
     }
 

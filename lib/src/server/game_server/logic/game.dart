@@ -1,22 +1,27 @@
 import 'package:code_tanks/code_tanks_common.dart';
+import 'package:code_tanks/src/server/game_server/logic/components/collision/collider_component.dart';
 
 import '../../../../code_tanks_entity_component_system.dart';
 
+import 'components/collision/health_component.dart';
+import 'components/collision/vector_2d.dart';
+import 'components/game_command/game_commands_component.dart';
+import 'components/game_event/game_event_component.dart';
 import 'components/render_component.dart';
+import 'components/scanner_component.dart';
 import 'components/socket_component.dart';
-import 'components/health_component.dart';
-import 'components/player_event_component.dart';
-import 'components/position_component.dart';
-import 'components/velocity_component.dart';
+import 'components/collision/physics_component.dart';
 
-import 'systems/apply_player_commands_system.dart';
-import 'systems/physics_system.dart';
-import 'systems/player_event_system.dart';
+import 'components/tank_utilities_component.dart';
+import 'systems/apply_game_commands_system.dart';
+import 'systems/game_event_system.dart';
+import 'systems/run_game_command_system.dart';
 import 'systems/render_system.dart';
-import 'systems/bullet_system.dart';
+import 'systems/physics_system.dart';
+import 'systems/scanner_system.dart';
 
 class Game {
-  final int id;
+  final String id;
 
   final gameKeyToEntityId = <String, int>{};
 
@@ -29,26 +34,38 @@ class Game {
 
     world
       ..addSystem(RenderSystem())
-      ..addSystem(PlayerEventSystem())
-      ..addSystem(ApplyPlayerCommandSystem())
-      ..addSystem(PhysicsSystem())
-      ..addSystem(BulletSystem());
+      ..addSystem(RunGameCommandSystem())
+      ..addSystem(ApplyGameCommandSystem())
+      ..addSystem(PhysicsSystem())      
+      ..addSystem(ScannerSystem())
+      ..addSystem(GameEventSystem());
   }
 
+  int count = 1;
+
   void initializeTank(String gameKey) {
+    // TODO randomize position
+    final position = Vector2D()..features[0] = count * 10;
+    final tankRect = CTRect(10, 10);
+
+    count++;
+
     final entity = world.createEntity()
-      ..addComponent(RenderComponent())
+      ..addComponent(RenderComponent(RenderType.tank))
       ..addComponent(HealthComponent())
-      ..addComponent(PositionComponent())
-      ..addComponent(VelocityComponent())
-      ..addComponent(PlayerEventComponent());
+      ..addComponent(PhysicsComponent(position))
+      ..addComponent(ColliderComponent(tankRect))
+      ..addComponent(GameCommandsComponent())
+      ..addComponent(ScannerComponent())
+      ..addComponent(GameEventComponent())
+      ..addComponent(TankUtilitiesComponent());
 
     gameKeyToEntityId[gameKey] = entity.id;
   }
 
   void onTankDisconnect(String gameKey) {}
 
-  void addTankAndStartGameIfAllTanksInGame(String gameKey, CommonWebSocket socket) {
+  void addTank(String gameKey, CommonWebSocket socket) {
     if (!isValidGameKey(gameKey)) {
       print('error adding tank');
       return;
@@ -59,32 +76,20 @@ class Game {
     world.idToEntity[gameKeyToEntityId[gameKey]].addComponent(SocketComponent(socket));
 
     print('added tank');
-
-    if (allTanksInGame()) {
-      startGame();
-    }
   }
 
   bool allTanksInGame() => gameKeysAdded.length == gameKeyToEntityId.length;
 
   bool isValidGameKey(String gameKey) => gameKeyToEntityId.containsKey(gameKey);
 
-  void startGame() {
+  Future<void> startGame() async {
     print('started game');
-  }
 
-  void onPlayerEvent(String gameKey, Map event) {
-    final entity = world.createEntity();
-    entity.addComponent(PlayerEventComponent());
+    for (var i = 0; i < 100; i++) {
+      print('update $i');
+      await world.updateAsync();
+    }
+
+
   }
 }
-
-// class TankStates {}
-
-// class PlayerInfo {
-//   final String gameKey;
-//   final String userId;
-//   final String tankId;
-
-//   PlayerInfo(this.gameKey, this.userId, this.tankId);
-// }

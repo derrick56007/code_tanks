@@ -5,6 +5,7 @@ class World {
   int nextId = 0;
 
   final systems = <System>[];
+  final systemByType = <Type, System>{};
   final componentTypeToIdSet = <Type, Set<int>>{};
   final idToEntity = <int, Entity>{};
 
@@ -24,9 +25,15 @@ class World {
   Future<void> updateAsync() async {
     for (final system in systems) {
       final sortedIds = getSortedIdsForEntitiesWithComponentTypes(system.componentTypes);
+      
+      await system.preProcess();
+      
       for (final id in sortedIds) {
         await system.process(idToEntity[id]);
       }
+
+      await system.postProcess();
+
     }
   }
 
@@ -56,5 +63,8 @@ class World {
   void addSystem(System system) {
     print('adding system $system');
     systems.add(system);
+    systemByType[system.runtimeType] = system;
   }
+
+  System getSystemByType(Type systemType) => systemByType[systemType];
 }

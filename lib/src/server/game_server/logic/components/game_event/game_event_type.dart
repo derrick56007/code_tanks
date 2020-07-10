@@ -1,0 +1,4 @@
+enum GameEventType {
+  tankScanned,
+  hitByBullet,
+}

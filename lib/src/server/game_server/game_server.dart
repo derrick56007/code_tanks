@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:code_tanks/code_tanks_server_common.dart';
 import 'package:code_tanks/src/server/game_server/game_server_docker_commands.dart';
+import 'package:code_tanks/src/server/game_server/logic/components/render_component.dart';
+import 'package:code_tanks/src/server/game_server/logic/systems/render_system.dart';
 import 'package:code_tanks/src/server/server_utils/utils.dart';
 import 'package:quiver/collection.dart';
 
@@ -81,23 +83,10 @@ class GameServer extends DummyServer {
 
   void handleSocketStart(HttpRequest req, ServerWebSocket socket) {
     socket //
-    ..on('game_instance_handshake', (data) => onGameInstanceHandshake(req, data, socket))
-    ..on('game_event', (data) => onPlayerEvent);
+      ..on('game_instance_handshake', (data) => onGameInstanceHandshake(req, data, socket));
   }
 
-  void onPlayerEvent(Map data) {
-    final gameKey = data['game_key'];
-    final gameId = gameKeyToGameId[gameKey];
-    final game = gameIdToGameInstance[gameId];
-
-    final event = data['event'];
-
-    // TODO validate events
-
-    game.onPlayerEvent(gameKey, event);
-  }
-
-  void onGameInstanceHandshake(HttpRequest req, Map data, ServerWebSocket socket) {
+  void onGameInstanceHandshake(HttpRequest req, Map data, ServerWebSocket socket) async {
     // TODO validate data
 
     final gameKey = data['game_key'];
@@ -117,8 +106,23 @@ class GameServer extends DummyServer {
 
     socketToGameKey[socket] = gameKey;
 
-    game.addTankAndStartGameIfAllTanksInGame(gameKey, socket);
+    game.addTank(gameKey, socket);
     print('game instance handshake success');
+    // authenticationSocket.on('derp', (_) => print('terp'));
+    // socket.send('derp');
+
+    if (game.allTanksInGame()) {
+      await game.startGame();
+
+      RenderSystem renderSys = game.world.getSystemByType(RenderSystem);
+      final allFrames = renderSys.frames.map((frame) => frame.toList()).toList(growable: false);
+
+      final msg = {
+        'frames': allFrames
+      };
+
+      authenticationSocket.send('run_game_response_$gameId', msg);
+    }
   }
 
   bool isValidGameKey(String gameKey) {
@@ -133,7 +137,7 @@ class GameServer extends DummyServer {
   //   return gameAddressToGameInstance.containsKey(address);
   // }
 
-  void onRunGame(Map data) async {
+  void onRunGame(data) async {
     // TODO validate data
 
     // final tankIds = data['tank_ids'];

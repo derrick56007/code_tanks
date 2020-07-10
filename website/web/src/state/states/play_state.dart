@@ -24,9 +24,9 @@ class PlayState extends State {
 
   PlayState(ClientWebSocket client) : super(client) {
     client
-      ..on('log', (data) => onLogData(data))
-      ..on('build_done', (data) => onBuildDone(data))
-      ..on('run_done', (data) => onRunGameDone(data));
+      ..on('log', onLogData)
+      ..on('build_done',  onBuildDone)
+      ..on('run_game_response', onRunGameResponse);
 
     editor = CodeMirror.fromElement(editorElement, options: options);
     editor.setLineNumbers(true);
@@ -35,15 +35,26 @@ import 'code_tanks_api.dart';
 
 class Custom extends BaseTank {
   @override
-  void onDetectRobot(DetectRobotEvent e) {
-    // TODO: implement onDetectRobot
+  void run() {
+    setRadarToRotateWithGun(true);
+
+    ahead(2);
+    rotateGun(2);
+    back(2);
+    setRotateRadar(2);
+
+    setRotateGun(2);
+    ahead(2);
   }
 
   @override
-  void tick() {
-    // TODO: implement tick
+  void onScanTank(ScanTankEvent e) {
+    back(2);
+    setRotateRadar(2);
+
+    setRotateGun(2);
+    ahead(2);
   }
-  
 }
 
 BaseTank createTank() => Custom();''');
@@ -62,8 +73,10 @@ BaseTank createTank() => Custom();''');
     buildBtn.disabled = false;
   }
 
-  void onRunGameDone(data) {
+  void onRunGameResponse(data) {
     // TODO validate data
+    print('received frames');
+    print(data);
 
     runBtn.disabled = false;
 

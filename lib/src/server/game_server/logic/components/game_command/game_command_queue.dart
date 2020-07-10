@@ -1,6 +1,7 @@
 
-import 'package:code_tanks/src/server/game_server/logic/commands/game_command.dart';
-import 'package:quiver/async.dart';
+
+import 'game_command.dart';
+import 'game_command_name.dart';
 
 class GameCommandQueue {
 
@@ -28,12 +29,36 @@ class GameCommandQueue {
     }
 
     if (command.isEndOfTurnCommand) {
-      endOfTurnCommands[command.name].add(command);
+      endOfTurnCommands[command.name].insert(0, command);
     } else {
-      commands.add(command);
+      commands.insert(0, command);
     }
 
     numCommands++;
+  }
+
+  List<GameCommand> peekNextCommands() {
+  final lst = <GameCommand>[];
+
+    while (commands.isNotEmpty) {
+
+      final command = commands.first;
+      lst.add(command);
+
+      if (!GameCommand.instantCommands.contains(command.name)) {
+        return lst;
+      }
+    }
+
+    for (final commandName in GameCommand.endOfTurnCommands) {
+      if (endOfTurnCommands[commandName].isNotEmpty) {
+        final command = endOfTurnCommands[commandName].first;
+
+        lst.add(command);
+      }
+    }
+
+    return lst;    
   }
 
   List<GameCommand> popNextCommands() {
