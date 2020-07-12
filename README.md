@@ -16,8 +16,20 @@ main() {
 }
 ```
 
+## Local Development
+
+Run redis
+docker-compose -f .\docker\authentication_server\docker-compose.yml up redis
+
+Run registry
+docker-compose -f .\docker\authentication_server\docker-compose.yml up code_tanks_registry
+
+Start servers
+dart .\bin\run_all_servers_test.dart
+
 ## Features and bugs
 
 Please file feature requests and bugs at the [issue tracker][tracker].
 
 [tracker]: http://example.com/issues/replaceme
+

@@ -3,30 +3,14 @@ Map getDoNothingTank() => {
   'language': 'en',
   'code_language': 'dart',
   'code': '''
-import 'code_tanks_api.dart';
+import 'package:code_tanks/code_tanks_dart_api.dart';
 
 class Custom extends BaseTank {
   @override
-  void run() {
-    setRadarToRotateWithGun(true);
-
-    ahead(2);
-    rotateGun(2);
-    back(2);
-    setRotateRadar(2);
-
-    setRotateGun(2);
-    ahead(2);
-  }
+  void run() {}
 
   @override
-  void onScanTank(ScanTankEvent e) {
-    back(2);
-    setRotateRadar(2);
-
-    setRotateGun(2);
-    ahead(2);
-  }
+  void onScanTank(ScanTankEvent e) {}
 }
 
 BaseTank createTank() => Custom();

@@ -8,7 +8,9 @@ docker/
 DockerFileAuthenticationServer
 DockerFileBuildServer
 DockerFileGameServer
+DockerFileWebServer
 example/
+.gitignore
 
 # Files and directories created by pub
 .dart_tool/

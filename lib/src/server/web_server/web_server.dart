@@ -7,8 +7,8 @@ import 'package:http_server/http_server.dart';
 import '../../../code_tanks_server_common.dart';
 
 class WebServer extends BaseServer {
-  final defaultPage = File('build/index.html');
-  final staticFiles = VirtualDirectory('build/');
+  final defaultPage = File('website/build/index.html');
+  final staticFiles = VirtualDirectory('website/build/');
 
   WebServer(String address, int port) : super('web', address, port) {
     staticFiles
@@ -24,6 +24,11 @@ class WebServer extends BaseServer {
         }
         staticFiles.serveFile(file, request);
       };
+
+    final current = Directory.current;
+    print(current.path);
+
+    print(defaultPage.absolute.path);      
   }
 
   @override

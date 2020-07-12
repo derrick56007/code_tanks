@@ -101,7 +101,7 @@ class GameServer extends DummyServer {
     print('game instance handshake success');
 
     if (game.allTanksInGame()) {
-      await game.startGame();
+      await game.runSimulation();
 
       RenderSystem renderSys = game.world.getSystemByType(RenderSystem);
       final allFrames = renderSys.frames.map((frame) => frame.toList()).toList(growable: false);
@@ -109,6 +109,10 @@ class GameServer extends DummyServer {
       final msg = {'frames': allFrames};
 
       authenticationSocket.send('run_game_response_$gameId', msg);
+
+      for (final key in game.gameKeyToEntityId.keys) {
+        await GameServerDockerCommands.killContainerByName(key);
+      }
     }
   }
 

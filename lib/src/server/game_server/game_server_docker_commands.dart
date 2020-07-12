@@ -83,6 +83,7 @@ class GameServerDockerCommands {
     final process = await Process.start('docker', args, runInShell: true);
     final lineStream = process.stdout.transform(utf8Decoder).transform(lineSplitter);
 
+    // TODO stream output to client socket
     lineStream.listen((line) {
       print(line);
     });
@@ -90,5 +91,22 @@ class GameServerDockerCommands {
 
     // return await process.exitCode;
     return;
+  }
+
+  static Future<int> killContainerByName(String gameKey) async {
+    final args = [
+      'kill',
+      gameKey,
+    ];
+
+    print('running docker create with args: $args');
+    final process = await Process.start('docker', args, runInShell: true);    
+
+    await process.stderr.drain();
+    final exitCode = await process.exitCode;
+
+    print('killed container $gameKey with exit code $exitCode');
+
+    return exitCode;
   }
 }

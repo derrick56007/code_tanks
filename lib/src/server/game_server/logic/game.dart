@@ -82,14 +82,14 @@ class Game {
 
   bool isValidGameKey(String gameKey) => gameKeyToEntityId.containsKey(gameKey);
 
-  Future<void> startGame() async {
-    print('started game');
+  Future<void> runSimulation() async {
+    print('started simulation');
 
     for (var i = 0; i < 100; i++) {
       print('update $i');
       await world.updateAsync();
     }
 
-
+    print('finished simulation');
   }
 }

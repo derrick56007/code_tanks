@@ -1,15 +1,12 @@
 
+import 'dart:io';
+
+import 'package:code_tanks/src/server/game_server/game_server_docker_commands.dart';
+import 'package:http_server/http_server.dart';
+
 void main() async {
-  var derp = [0, 1, 2];
-
-  derp.insert(3, 3);
-  print(derp);
+  await GameServerDockerCommands.killContainerByName('great_ardinghelli');
 }
-
-class Derp {
-  int a = 0;
-}
-
 
 
 
