@@ -1,4 +1,5 @@
 import 'src/client.dart';
+import 'src/state/states/play_state/play_state.dart';
 
 void main() async {
   final address = '127.0.0.1';
@@ -11,11 +12,13 @@ void main() async {
     print('error: $data');
   });
 
-  StateManager.shared.addAll({
-    'login': LoginState(client),
-    'register': RegisterState(client),
-    'play': PlayState(client)
-  });
-  
-  StateManager.shared.pushState('login');  
+  final stateManager = StateManager();
+
+  stateManager
+    ..addAll({
+      'login': LoginState(client, stateManager),
+      'register': RegisterState(client, stateManager),
+      'play': PlayState(client, stateManager)
+    })
+    ..pushState('login');
 }

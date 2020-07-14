@@ -14,7 +14,7 @@ class LoginState extends State {
 
   StreamSubscription submitSub;
 
-  LoginState(ClientWebSocket client) : super(client) {
+  LoginState(ClientWebSocket client, StateManager sm) : super(client, sm) {
     client.onClose.listen(_logoutSuccessful);
 
     client
@@ -28,7 +28,7 @@ class LoginState extends State {
 
     querySelector('#sign-up-btn')
         .onClick
-        .listen((_) => StateManager.shared.pushState('register'));
+        .listen((_) => stateManager.pushState('register'));
   }
 
   @override
@@ -80,11 +80,11 @@ class LoginState extends State {
   void _loginSuccessful(_) {
     print('successfully logged in');
 
-    StateManager.shared.pushState('play');
+    stateManager.pushState('play');
   }
 
   void _logoutSuccessful(_) {
-    StateManager.shared.pushState('login');
+    stateManager.pushState('login');
 
     querySelector('#friends-list').children.clear();
   }

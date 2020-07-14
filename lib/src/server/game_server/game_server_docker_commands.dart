@@ -99,7 +99,7 @@ class GameServerDockerCommands {
       gameKey,
     ];
 
-    print('running docker create with args: $args');
+    print('running docker kill with args: $args');
     final process = await Process.start('docker', args, runInShell: true);    
 
     await process.stderr.drain();

@@ -36,14 +36,14 @@ class BuildServer extends DummyServer {
       final errorMsg = {'code': exitCode};
 
       authenticationSocket.send('build_code_error_$uuid', errorMsg);
+    } else {
+      // check if save to registry works
+      await BuildServerDockerCommands.saveToRegistry(
+          fp, uuid, authenticationSocket);
 
-      return;
+      authenticationSocket.send('build_code_success_$uuid');
     }
 
-    // check if save to registry works
-    await BuildServerDockerCommands.saveToRegistry(
-        fp, uuid, authenticationSocket);
-
-    authenticationSocket.send('build_code_success_$uuid');
+    await Directory(fp).delete(recursive: true);
   }
 }

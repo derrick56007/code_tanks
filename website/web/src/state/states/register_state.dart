@@ -18,7 +18,7 @@ class RegisterState extends State {
 
   StreamSubscription submitSub;
 
-  RegisterState(ClientWebSocket client) : super(client) {
+  RegisterState(ClientWebSocket client, StateManager sm) : super(client, sm) {
     registerBtn.onClick.listen((_) {
       registerBtn.blur();
       submitRegister();
@@ -26,7 +26,7 @@ class RegisterState extends State {
 
     querySelector('#sign-in-btn')
         .onClick
-        .listen((_) => StateManager.shared.pushState('login'));
+        .listen((_) => stateManager.pushState('login'));
 
     client
       ..on('register_successful', _registerSuccessful)
@@ -83,7 +83,7 @@ class RegisterState extends State {
   void _registerSuccessful(_) {
     print('register successful');
 
-    StateManager.shared.pushState('login');
+    stateManager.pushState('login');
   }
 
   void _registerFailure(data) {

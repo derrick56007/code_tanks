@@ -61,8 +61,14 @@ class AuthenticationServer extends BaseServer {
       ..on('register', (data) => onRegister(socket, data))
       ..on('login', (data) => onLogin(socket, data))
       ..on('logout', (_) => onLogout(socket))
+      ..on('create_new_tank', (data) => onCreateNewTank(socket, data))
+      ..on('make_tank_copy', (data) => onMakeTakeCopy(socket, data))
+      ..on('open_existing_tank', (data) => onOpenExistingTank(socket, data))
+      ..on('save_tank', (data) => onSaveTank(socket, data))
       ..on('build_code', (data) => onBuildCode(socket, data))
-      ..on('run_game', (data) => onRunGame(socket, data));
+      ..on('run_game', (data) => onRunGame(socket, data))
+      ..on('get_built_tanks', (_) => onGetBuiltTanks(socket))
+      ..on('get_saved_tanks', (_) => onGetSavedTanks(socket));
   }
 
   bool requestFromBuildServer(HttpRequest req) {
@@ -333,6 +339,8 @@ class AuthenticationServer extends BaseServer {
   }
 
   Future<void> onBuildCode(ServerWebSocket socket, data) async {
+    await onSaveTank(socket, data);
+
     const failMsg = {'success': false};
     if (!isLoggedIn(socket)) {
       const logMsg = {'line': 'need to be logged in to build code'};
@@ -352,9 +360,12 @@ class AuthenticationServer extends BaseServer {
       return;
     }
 
+    final userId = getUserIdFromSocket(socket);
+
     final code = cleanCode(data['code']);
-    final codeLang = data['code_language'];
     final tankName = data['tank_name'];
+
+    final codeLang = await authDb.getCodeLangForUserIdWithTankName(userId, tankName);
 
     if (!isValidCodeUpload(codeLang, code, tankName)) {
       const logMsg = {'line': 'invalid code upload'};
@@ -369,8 +380,6 @@ class AuthenticationServer extends BaseServer {
       const msg = {'success': true};
 
       socket.send('build_done', msg);
-
-      final userId = getUserIdFromSocket(socket);
 
       print('saving for user $userId, $tankName, $tankId');
       final saved = await authDb.saveTankIdForUser(userId, tankName, tankId);
@@ -434,7 +443,7 @@ class AuthenticationServer extends BaseServer {
     }
 
     Future<void> _handleSuccess(_) async {
-// remove dispatch
+      // remove dispatch
       removeDispatches();
 
       if ((await authDb.getCodeUploadUuid(hashedCodeUpload, codeLangWithCode)) != 'null') {
@@ -542,5 +551,138 @@ class AuthenticationServer extends BaseServer {
     gameServer.send('run_game', msg);
 
     await runGameDone;
+  }
+
+  void onGetBuiltTanks(ServerWebSocket socket) async {
+    if (!isLoggedIn(socket)) {
+      return;
+    }
+
+    final userId = getUserIdFromSocket(socket);
+
+    final msg = {'built_tanks': await authDb.getBuiltTankNamesForUserId(userId)};
+
+    socket.send('built_tanks', msg);
+  }
+
+  void onCreateNewTank(ServerWebSocket socket, data) async {
+    if (!isLoggedIn(socket)) {
+      return;
+    }
+
+    final userId = getUserIdFromSocket(socket);
+
+    final tankName = data['tank_name'];
+    final codeLang = data['code_language'];
+
+    final defaultCodes = <String, String>{
+      'dart': '''
+import 'package:code_tanks/code_tanks_dart_api.dart';
+
+class Custom extends BaseTank {
+  @override
+  void run() {}
+
+  @override
+  void onScanTank(ScanTankEvent e) {}
+}
+
+BaseTank createTank() => Custom();
+      ''',
+    };
+
+    // TODO get default code
+    final defaultCode = defaultCodes[codeLang];
+
+    if (defaultCodes == null) {
+      throw UnimplementedError();
+    }
+
+    if (!(await authDb.tankNameExists(userId, tankName))) {
+      // TODO validate codelang
+      await authDb.saveCodeLangForUserIdWithTankName(userId, tankName, codeLang);
+      await authDb.saveCodeForUserIdWithTankName(userId, tankName, defaultCode);
+
+      onOpenExistingTank(socket, data);
+    }
+  }
+
+  void onSaveTank(ServerWebSocket socket, data) async {
+    if (!isLoggedIn(socket)) {
+      return;
+    }
+
+    final userId = getUserIdFromSocket(socket);
+
+    final tankName = data['tank_name'];
+    final code = data['code'];
+
+    // TODO validate code
+
+    if (await authDb.tankNameExists(userId, tankName)) {
+      await authDb.saveCodeForUserIdWithTankName(userId, tankName, code);
+    }
+  }
+
+  void onOpenExistingTank(ServerWebSocket socket, data) async {
+    if (!isLoggedIn(socket)) {
+      return;
+    }
+
+    final userId = getUserIdFromSocket(socket);
+
+    final tankName = data['tank_name'];
+
+    if (await authDb.tankNameExists(userId, tankName)) {
+      final code = await authDb.getCodeForUserIdWithTankName(userId, tankName);
+
+      final msg = {
+        'code': code,
+        'tank_name': tankName,
+      };
+
+      socket.send('open_existing_tank_success', msg);
+      return;
+    }
+
+    socket.send('open_existing_tank_failure');
+  }
+
+  void onGetSavedTanks(ServerWebSocket socket) async {
+    if (!isLoggedIn(socket)) {
+      return;
+    }
+
+    final userId = getUserIdFromSocket(socket);
+
+    final msg = {'saved_tanks': await authDb.getSavedTankNamesForUserId(userId)};
+
+    socket.send('saved_tanks', msg);
+  }
+
+  void onMakeTakeCopy(ServerWebSocket socket, data) async {
+    if (!isLoggedIn(socket)) {
+      return;
+    }
+
+    final userId = getUserIdFromSocket(socket);
+
+    if (!(data is Map) || data['tank_name'] == null) {
+      return;
+    }
+
+    if (await authDb.tankNameExists(userId, data['tank_name'])) {
+      data['tank_name'] = data['tank_name'] + '_copy';
+
+      if (await authDb.tankNameExists(userId, data['tank_name'])) {
+        final code = await authDb.getCodeForUserIdWithTankName(userId, data['tank_name']);
+        final codeLang = await authDb.getCodeLangForUserIdWithTankName(userId, data['tank_name']);
+
+        await authDb.saveCodeLangForUserIdWithTankName(userId, data['tank_name'], codeLang);
+        await authDb.saveCodeForUserIdWithTankName(userId, data['tank_name'], code);
+
+        onOpenExistingTank(socket, data);
+      }
+    }
   }
 }

@@ -3,42 +3,24 @@ import 'dart:html';
 import 'state.dart';
 
 class StateManager {
-  static final shared = StateManager._internal();
+  State currentState;
 
-  final _states = <String, State>{};
+  final states = <String, State>{};
 
-  StateManager._internal() {
-    window.onPopState.listen((PopStateEvent e) {
-      final stateName = e.state.toString();
+  Iterable<String> get keys => states.keys;
 
-      _showState(stateName);
-    });
-  }
-
-  Iterable<String> get keys => _states.keys;
-
-  void addAll(Map<String, State> states) => _states.addAll(states);
+  void addAll(Map<String, State> _states) => states.addAll(_states);
 
   void pushState(String stateName) {
-    if (!_states.containsKey(stateName)) {
+    if (!states.containsKey(stateName)) {
       print('No such state!');
       return;
     }
 
     print('pushed $stateName');
-    _showState(stateName);
-  }
+    currentState?.hide();
 
-  void _showState(String stateName) {
-    if (!_states.containsKey(stateName)) {
-      print('No such state!');
-      return;
-    }
-
-    _states.entries
-        .where((e) => e.key != stateName)
-        .forEach((e) => e.value.hide());
-
-    _states[stateName].show();
+    currentState = states[stateName];
+    currentState.show();
   }
 }

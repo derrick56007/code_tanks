@@ -5,6 +5,8 @@ import 'package:code_tanks/code_tanks_server_common.dart';
 import 'package:code_tanks/src/server/game_server/game_server_docker_commands.dart';
 import 'package:code_tanks/src/server/game_server/logic/systems/render_system.dart';
 
+import 'package:pedantic/pedantic.dart';
+
 import '../server_common/dummy_server.dart';
 import 'logic/game.dart';
 
@@ -66,6 +68,7 @@ class GameServer extends DummyServer {
     }
 
     socketToGameKey.remove(socket);
+    gameKeyToGameId.remove(gameKey);
   }
 
   Future close() async {
@@ -103,16 +106,18 @@ class GameServer extends DummyServer {
     if (game.allTanksInGame()) {
       await game.runSimulation();
 
+      for (final key in game.gameKeyToEntityId.keys) {
+        unawaited(GameServerDockerCommands.killContainerByName(key));
+      }
+
       RenderSystem renderSys = game.world.getSystemByType(RenderSystem);
       final allFrames = renderSys.frames.map((frame) => frame.toList()).toList(growable: false);
 
       final msg = {'frames': allFrames};
 
-      authenticationSocket.send('run_game_response_$gameId', msg);
+      gameIdToGameInstance.remove(gameId);
 
-      for (final key in game.gameKeyToEntityId.keys) {
-        await GameServerDockerCommands.killContainerByName(key);
-      }
+      authenticationSocket.send('run_game_response_$gameId', msg);
     }
   }
 
@@ -141,7 +146,7 @@ class GameServer extends DummyServer {
 
       gameKeyToGameId[gameKey] = gameId;
 
-      await GameServerDockerCommands.runTankContainer(gameKey, tankId);
+      unawaited(GameServerDockerCommands.runTankContainer(gameKey, tankId));
     }
 
     // TODO done
