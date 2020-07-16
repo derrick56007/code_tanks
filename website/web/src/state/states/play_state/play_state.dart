@@ -1,13 +1,17 @@
 import 'dart:async';
 import 'dart:html';
+import 'dart:math';
 
 import 'package:codemirror/codemirror.dart';
 
 import '../../../client.dart';
 import '../../../client_web_socket/client_websocket.dart';
 import '../../state.dart';
+import 'file_states/delete_confirmation_state.dart';
 import 'file_states/new_tank_state.dart';
 import 'file_states/open_existing_tank_state.dart';
+import 'file_states/rename_state.dart';
+import 'file_states/save_tank_as_state.dart';
 import 'run_states/landing_state.dart';
 import 'run_states/settings_state.dart';
 import 'run_states/view_state.dart';
@@ -29,6 +33,8 @@ class PlayState extends State {
 
   final Element tabContainer = querySelector('#tab-container');
 
+  final ButtonElement submitSaveAsTankBtn = querySelector('#submit-save-as-tank-btn');
+
   final Element editorElement = querySelector('#editor');
   final Element logOutput = querySelector('#log-output');
   final InputElement newTankName = querySelector('#new-tank-name');
@@ -48,8 +54,9 @@ class PlayState extends State {
 
     editor = CodeMirror.fromElement(editorElement, options: options);
     editor
-      ..setLineNumbers(true)
-      ..setReadOnly(true);
+      ..setLineNumbers(false)
+      ..setReadOnly(true)
+      ..refresh();
 
     final runStateManager = StateManager();
     runStateManager
@@ -64,22 +71,53 @@ class PlayState extends State {
     fileStateManager
       ..addAll({
         'new-tank': NewTankState(client, fileStateManager),
-        'open-existing': OpenExistingTankState(client, stateManager),
+        'open-existing': OpenExistingTankState(client, fileStateManager),
+        'save-as-tank': SaveTankAsState(client, fileStateManager),
+        'delete-confirmation': DeleteConfirmationState(client, fileStateManager),
+        'rename': RenameState(client, fileStateManager),
       });
 
     newTankBtn.onClick.listen((e) {
-      fileStateManager.pushState('new-tank');
       e.stopImmediatePropagation();
       e.stopPropagation();
+      fileStateManager.pushState('new-tank');
     });
 
     openBtn.onClick.listen((e) {
-      fileStateManager.pushState('open-existing');
       e.stopImmediatePropagation();
       e.stopPropagation();
+
+      client.send('get_saved_tanks');
+
+      fileStateManager.pushState('open-existing');
     });
 
     Element currentTab;
+
+    void closeTab(Element tabToClose) {
+      final idx = tabContainer.children.indexOf(tabToClose);
+      tabToClose.remove();
+
+      if (tabContainer.children.isNotEmpty) {
+        final prevIdx = max(idx - 1, 0);
+        tabContainer.children[prevIdx].click();
+      } else {
+        editor
+          ..getDoc().setValue('')
+          ..setLineNumbers(false)
+          ..setReadOnly(true)
+          ..focus()
+          ..refresh();
+
+        editorElement.click();
+
+        currentTab = null;
+        currentTankName = null;
+
+        saveBtn.disabled = true;
+        buildBtn.disabled = true;
+      }
+    }
 
     final tankNameToCode = <String, String>{};
 
@@ -93,7 +131,20 @@ class PlayState extends State {
         saveBtn.disabled = false;
         buildBtn.disabled = false;
 
-        final tab = Element.html('<div class="tab selected-tab">${data['tank_name']}</div>');
+        final tab = Element.html('''
+          <div class="tab selected-tab">
+            <div>${data['tank_name']}</div>
+            <i id="close-tab-btn" class="material-icons mdc-button__icon tab-icon">
+              close
+            </i>
+          </div>
+        ''');
+        tab.querySelector('#close-tab-btn').onClick.listen((e) {
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+          closeTab(tab);
+        });
+
         tab.onClick.listen((_) {
           if (currentTab != tab) {
             if (currentTankName != null) {
@@ -111,9 +162,10 @@ class PlayState extends State {
 
             editor
               ..getDoc().setValue(code)
+              ..setLineNumbers(true)
               ..setReadOnly(false)
               ..focus()
-              ..refresh();            
+              ..refresh();
           }
         });
         tabContainer.children.add(tab);
@@ -137,35 +189,125 @@ class PlayState extends State {
       });
     });
 
-    makeCopyBtn.onClick.listen((e) {});
+    makeCopyBtn.onClick.listen((e) {
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+
+      if (currentTankName != null) {
+        final msg = {'tank_name': currentTankName};
+
+        print(msg);
+
+        client.send('make_tank_copy', msg);
+      }
+    });
+
+    submitSaveAsTankBtn.onClick.listen((e) {
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+
+      final InputElement saveAsTankName = querySelector('#save-as-tank-name');
+
+      if (currentTankName != null) {
+        final msg = {
+          'tank_name': currentTankName,
+          'new_tank_name': saveAsTankName.value.trim(),
+        };
+
+        client.send('save_tank_as', msg);
+      }
+    });
+
+    saveAsBtn.onClick.listen((e) {
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+
+      if (currentTankName == null) {
+        return;
+      }
+
+      fileStateManager.pushState('save-as-tank');
+    });
+
+    closeFileBtn.onClick.listen((e) {
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+
+      if (currentTab != null) {
+        closeTab(currentTab);
+      }
+    });
+
+    deleteBtn.onClick.listen((e) {
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+
+      if (currentTab != null) {
+        querySelector('#delete-confirmation-tank-name').text = currentTankName;
+        fileStateManager.pushState('delete-confirmation');
+      }
+    });
+
+    querySelector('#submit-delete-confirmation-tank-btn').onClick.listen((_) {
+      final tankToDelete = currentTankName;
+      closeTab(currentTab);
+
+      client.send('delete_tank', {'tank_name': tankToDelete});
+
+      fileStateManager.currentState?.hide();
+    });
+
+    final InputElement renameTankName = querySelector('#rename-tank-name');
+    Element tabToRename;
+    String tankToRename;
+
+    renameBtn.onClick.listen((e) {
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+
+      if (currentTab != null) {
+        tankToRename = currentTankName;
+        tabToRename = currentTab;
+        renameTankName.value = currentTankName;
+
+        fileStateManager.pushState('rename');
+      }
+    });
+
+    final ButtonElement submitRenameTankBtn = querySelector('#submit-rename-tank-btn');
+
+    submitRenameTankBtn.onClick.listen((_) {
+
+      if (tankToRename != null) {
+        client.send('rename_tank', {
+          'tank_name': tankToRename,
+          'new_tank_name': renameTankName.value.trim(),
+        });
+
+        closeTab(tabToRename);
+        tabToRename = null;
+        tankToRename = null;
+
+        fileStateManager.currentState?.hide();
+      }
+    });
+
+    querySelectorAll('.modal-backdrop').onClick.listen((_) {
+        fileStateManager.currentState?.hide();
+    });
   }
 
   void onBuildDone(data) {
-    // TODO validate data
-
-    final success = data['success'];
+    // final success = data['success'];
 
     buildBtn.disabled = false;
   }
 
-  // void onRunGameResponse(data) {
-  //   // TODO validate data
-  //   print('received frames');
-  //   print(data);
-
-  //   runBtn.disabled = false;
-
-  //   buildBtn.disabled = false;
-  // }
-
   void onLogData(data) {
-    // TODO validate data
-
     final line = data['line'];
 
     final lineElement = Element.html('<div class="log">$line</div>');
 
-    // TODO formatted logs
     logOutput
       ..children.add(lineElement)
       ..scrollTop = logOutput.scrollHeight;
@@ -187,11 +329,8 @@ class PlayState extends State {
 
       buildBtn.disabled = true;
     });
-
-    // editor.focus();
-    // editor.refresh();
   }
-
+ 
   @override
   void hide() {
     playCard.style.display = 'none';

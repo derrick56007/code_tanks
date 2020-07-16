@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:html';
 import 'dart:math';
-import 'dart:web_gl';
 
 import '../../../../client_web_socket/client_websocket.dart';
 import '../../../state.dart';
@@ -34,6 +33,14 @@ class SettingsState extends State {
     removeBtnSub?.cancel();
   }
 
+  void enableStartBtnIfEnoughTanks() {
+    if (settingsRightPane.children.length > 1) {
+      startBtn.disabled = false;
+    } else {
+      startBtn.disabled = true;
+    }
+  }
+
   @override
   void show() async {
     client.send('get_built_tanks');
@@ -43,6 +50,7 @@ class SettingsState extends State {
 
       settingsLeftPane.children.clear();
       settingsRightPane.children.clear();
+      startBtn.disabled = true;
 
       // TODO validate data
       final tankNames = data['built_tanks'];
@@ -72,7 +80,7 @@ class SettingsState extends State {
 
       addBtnSub = addBtn.onClick.listen((_) {
         if (addSelected != null) {
-          final el = Element.html('<div>$addSelectedName</div>');
+          final el = Element.html('<div class="selectable">$addSelectedName</div>');
 
           el.onClick.listen((_) {
             removeSelected?.classes?.remove('selected-tank');
@@ -86,6 +94,8 @@ class SettingsState extends State {
           });
 
           settingsRightPane.children.add(el);
+
+          enableStartBtnIfEnoughTanks();
         }
       });
 
@@ -102,6 +112,8 @@ class SettingsState extends State {
             settingsRightPane.children[prevIdx].click();
           }
         }
+
+        enableStartBtnIfEnoughTanks();
       });
     });
 

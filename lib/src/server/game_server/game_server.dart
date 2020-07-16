@@ -77,21 +77,15 @@ class GameServer extends DummyServer {
     print('$name server closed at $address:$port');
   }
 
-  void handleSocketStart(HttpRequest req, ServerWebSocket socket) {
-    socket //
-      ..on('game_instance_handshake', (data) => onGameInstanceHandshake(req, data, socket));
+  void handleSocketStart(HttpRequest _, ServerWebSocket socket) {
+    socket.on('game_instance_handshake', (data) => onGameInstanceHandshake(socket, data));
   }
 
-  void onGameInstanceHandshake(HttpRequest req, Map data, ServerWebSocket socket) async {
-    // TODO validate data
-
+  void onGameInstanceHandshake(ServerWebSocket socket, data) async {
     final gameKey = data['game_key'];
-
-    print('game key $gameKey');
 
     if (!isValidGameKey(gameKey) || socketToGameKey.containsKey(socket)) {
       print('game instance handshake failure');
-
       return;
     }
 
@@ -124,8 +118,6 @@ class GameServer extends DummyServer {
   bool isValidGameKey(String gameKey) => gameKeyToGameId.containsKey(gameKey);
 
   void onRunGame(data) async {
-    // TODO validate data
-
     final gameKeyToTankIds = data['game_keys'];
 
     for (final tankId in gameKeyToTankIds.values) {
@@ -148,10 +140,5 @@ class GameServer extends DummyServer {
 
       unawaited(GameServerDockerCommands.runTankContainer(gameKey, tankId));
     }
-
-    // TODO done
-    // gameAddressToGameInstance.remove(address);
-
-    // await GameServerDockerCommands.removeDockerNetwork(networkId);
   }
 }

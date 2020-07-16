@@ -2,15 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:code_tanks/src/server/authentication_server/default_tanks/default_tanks.dart';
-import 'package:code_tanks/src/server/server_common/base_server.dart';
-import 'package:code_tanks/src/server/server_utils/utils.dart';
 import 'package:crypto/crypto.dart';
 import 'package:password_hash/password_hash.dart';
 import 'package:quiver/collection.dart';
 
+import '../server_common/base_server.dart';
+import '../server_utils/utils.dart';
 import '../../../code_tanks_server_common.dart';
-import '../authentication_server/authentication_database.dart';
+import 'authentication_database.dart';
 
 class AuthenticationServer extends BaseServer {
   static final _pbkdf2 = PBKDF2();
@@ -25,7 +24,7 @@ class AuthenticationServer extends BaseServer {
   final userNameToBuildServerBiMap = BiMap<String, String>();
   final loggedInSockets = <ServerWebSocket, String>{};
 
-  bool builtDefaultTanks = false;
+  // bool builtDefaultTanks = false;
 
   AuthenticationServer(String address, int port, List<String> _gameServerAddresses, List<String> _buildServerAddresses,
       String redisAddress, int redisPort)
@@ -56,7 +55,6 @@ class AuthenticationServer extends BaseServer {
       socket.on('game_server_handshake', (_) => onGameServerHandshake(req, socket));
     }
 
-    // ..on('web_server_handshake', () => onWebServerHandshake(req, socket))
     socket
       ..on('register', (data) => onRegister(socket, data))
       ..on('login', (data) => onLogin(socket, data))
@@ -64,7 +62,10 @@ class AuthenticationServer extends BaseServer {
       ..on('create_new_tank', (data) => onCreateNewTank(socket, data))
       ..on('make_tank_copy', (data) => onMakeTakeCopy(socket, data))
       ..on('open_existing_tank', (data) => onOpenExistingTank(socket, data))
+      ..on('delete_tank', (data) => onDeleteTank(socket, data))
+      ..on('rename_tank', (data) => onRenameTank(socket, data))
       ..on('save_tank', (data) => onSaveTank(socket, data))
+      ..on('save_tank_as', (data) => onSaveTankAs(socket, data))
       ..on('build_code', (data) => onBuildCode(socket, data))
       ..on('run_game', (data) => onRunGame(socket, data))
       ..on('get_built_tanks', (_) => onGetBuiltTanks(socket))
@@ -86,7 +87,6 @@ class AuthenticationServer extends BaseServer {
   @override
   void handleSocketDone(HttpRequest req, ServerWebSocket socket) {
     // req.connectionInfo will be null here
-    // final address = req.connectionInfo.remoteAddress.address;
 
     gameServerSockets.remove(socket);
     buildServerSockets.remove(socket);
@@ -111,36 +111,36 @@ class AuthenticationServer extends BaseServer {
   }
 
   void onAnyBuildServerConnected(ServerWebSocket socket) {
-    if (!builtDefaultTanks) {
-      print('building default tanks');
+    // if (!builtDefaultTanks) {
+    //   print('building default tanks');
 
-      buildDefaultTanks();
-    }
+    //   buildDefaultTanks();
+    // }
   }
 
-  void buildDefaultTanks() async {
-    // TODO find better way to ensure default tanks are built
-    for (final tankMap in DefaultTanks.tankMap.values) {
-      final code = tankMap['code'];
-      final codeLang = tankMap['code_language'];
-      final tankName = tankMap['tank_name'];
+  // void buildDefaultTanks() async {
+  //   // TODO find better way to ensure default tanks are built
+  //   for (final tankMap in DefaultTanks.tankMap.values) {
+  //     final code = tankMap['code'];
+  //     final codeLang = tankMap['code_language'];
+  //     final tankName = tankMap['tank_name'];
 
-      if (!isValidCodeUpload(codeLang, code, tankName)) {
-        print('invalid code upload');
-        return;
-      }
+  //     if (!isValidCodeUpload(codeLang, code, tankName)) {
+  //       print('invalid code upload');
+  //       return;
+  //     }
 
-      attemptBuildCode(codeLang, code, onBuildSuccess: (tankId) async {
-        print('built default tank $tankName');
+  //     attemptBuildCode(codeLang, code, onBuildSuccess: (tankId) async {
+  //       print('built default tank $tankName');
 
-        await authDb.saveTankIdForUser('default_tanks', tankName, tankId);
-      }, onAlreadyBuilt: () {
-        print('already built default tank $tankName');
-      });
-    }
+  //       await authDb.saveTankIdForUser('default_tanks', tankName, tankId);
+  //     }, onAlreadyBuilt: () {
+  //       print('already built default tank $tankName');
+  //     });
+  //   }
 
-    builtDefaultTanks = true;
-  }
+  //   builtDefaultTanks = true;
+  // }
 
   void onGameServerHandshake(HttpRequest req, ServerWebSocket socket) {
     final address = req.connectionInfo.remoteAddress.address;
@@ -326,13 +326,7 @@ class AuthenticationServer extends BaseServer {
     return true;
   }
 
-  String hashCodeUpload(String codeLang, String code) {
-    final codeLangWithCode = '$codeLang$code';
-
-    final bytes = utf8.encode(codeLangWithCode); // data being hashed
-
-    return sha1.convert(bytes).toString();
-  }
+  String hashCodeUpload(String codeLang, String code) => sha1.convert(utf8.encode('$codeLang$code')).toString();
 
   String cleanCode(String code) {
     return code;
@@ -347,17 +341,17 @@ class AuthenticationServer extends BaseServer {
       print('need to be logged in to build code');
       socket.send('log', logMsg);
       socket.send('build_done', failMsg);
-      return;
+      return onNotLoggedInError(socket);
     }
 
-    if (!(data is Map)) {
+    if (!(data is Map) || data['code'] == null || data['tank_name'] == null) {
       const logMsg = {'line': 'incorrect data type for build'};
 
       print('incorrect data type for build');
       socket.send('log', logMsg);
 
       socket.send('build_done', failMsg);
-      return;
+      return onInvalidDataError(socket);
     }
 
     final userId = getUserIdFromSocket(socket);
@@ -373,10 +367,10 @@ class AuthenticationServer extends BaseServer {
 
       socket.send('log', logMsg);
       socket.send('build_done', failMsg);
-      return;
+      return onInvalidDataError(socket);
     }
 
-    attemptBuildCode(codeLang, code, onBuildSuccess: (tankId) async {
+    await attemptBuildCode(codeLang, code, onBuildSuccess: (tankId) async {
       const msg = {'success': true};
 
       socket.send('build_done', msg);
@@ -389,11 +383,12 @@ class AuthenticationServer extends BaseServer {
       } else {
         print('error saving custom tank');
       }
-    }, onAlreadyBuilt: () {
+    }, onAlreadyBuilt: (tankId) async {
       const msg = {'success': true};
 
       socket.send('build_done', msg);
       print('tank already built');
+      await authDb.saveTankIdForUser(userId, tankName, tankId);
 
       const l = {'line': 'tank already built'};
 
@@ -408,24 +403,25 @@ class AuthenticationServer extends BaseServer {
 
   static void defaultOnBuildSuccess(String tankUuid) {}
 
-  static void defaultOnAlreadyBuilt() {}
+  static void defaultOnAlreadyBuilt(String tankUuid) {}
 
   static void defaultOnBuildError() {}
 
   static void defaultOnBuildLogPart(String line) {}
 
-  void attemptBuildCode(String codeLang, String code,
+  Future<void> attemptBuildCode(String codeLang, String code,
       {void Function(String tankUuid) onBuildSuccess = defaultOnBuildSuccess,
-      void Function() onAlreadyBuilt = defaultOnAlreadyBuilt,
+      void Function(String tankUuid) onAlreadyBuilt = defaultOnAlreadyBuilt,
       void Function() onBuildError = defaultOnBuildError,
       void Function(String line) onLog = defaultOnBuildLogPart}) async {
     final codeLangWithCode = '$codeLang$code';
 
     final hashedCodeUpload = hashCodeUpload(codeLang, code);
 
-    if ((await authDb.getCodeUploadUuid(hashedCodeUpload, codeLangWithCode)) != 'null') {
+    final alreadyBuiltId = await authDb.getCodeUploadUuid(hashedCodeUpload, codeLangWithCode);
+    if (alreadyBuiltId != 'null') {
       // uuid exists
-      onAlreadyBuilt();
+      onAlreadyBuilt(alreadyBuiltId);
       return;
     }
 
@@ -446,9 +442,11 @@ class AuthenticationServer extends BaseServer {
       // remove dispatch
       removeDispatches();
 
-      if ((await authDb.getCodeUploadUuid(hashedCodeUpload, codeLangWithCode)) != 'null') {
+      final alreadyBuiltId = await authDb.getCodeUploadUuid(hashedCodeUpload, codeLangWithCode);
+
+      if (alreadyBuiltId != 'null') {
         // this means that before this build was completed, a duplicate code upload finished building first
-        onAlreadyBuilt();
+        onAlreadyBuilt(alreadyBuiltId);
         return;
       }
 
@@ -507,10 +505,11 @@ class AuthenticationServer extends BaseServer {
     return gameServerSockets.keys.first;
   }
 
-  void onRunGame(ServerWebSocket socket, data) async {
-    // TODO validate data
-    if (!isLoggedIn(socket)) {
-      return;
+  Future<void> onRunGame(ServerWebSocket socket, data) async {
+    if (!isLoggedIn(socket)) return onNotLoggedInError(socket);
+
+    if (!(data is Map) || data['tank_names'] == null || !(data['tank_names'] is List)) {
+      return onInvalidDataError(socket);
     }
 
     final tankNames = data['tank_names'];
@@ -524,7 +523,7 @@ class AuthenticationServer extends BaseServer {
 
       if (tankId == 'null') {
         print('failed getting tankId from tankname');
-        return;
+        return onInvalidDataError(socket);
       }
 
       String gameKey;
@@ -536,44 +535,38 @@ class AuthenticationServer extends BaseServer {
       gameKeyToTankIds[gameKey] = tankId;
     }
 
+    if (gameKeyToTankIds.length <= 1) return onInvalidDataError(socket);
+
     final nextGameId = await authDb.getNextGameId();
 
     final gameServer = getAnyGameServer();
 
     final msg = {'game_id': nextGameId, 'game_keys': gameKeyToTankIds};
 
-    void onRunGameDone(data) {
+    final runGameDone = gameServer.onSingleAsync('run_game_response_$nextGameId', (_data) {
       print('received frames');
-      socket.send('run_game_response', data);
-    }
+      socket.send('run_game_response', _data);
+    });
 
-    final runGameDone = gameServer.onSingleAsync('run_game_response_$nextGameId', onRunGameDone);
     gameServer.send('run_game', msg);
 
     await runGameDone;
   }
 
-  void onGetBuiltTanks(ServerWebSocket socket) async {
-    if (!isLoggedIn(socket)) {
-      return;
-    }
+  Future<void> onGetBuiltTanks(ServerWebSocket socket) async {
+    if (!isLoggedIn(socket)) return onNotLoggedInError(socket);
 
-    final userId = getUserIdFromSocket(socket);
-
-    final msg = {'built_tanks': await authDb.getBuiltTankNamesForUserId(userId)};
-
-    socket.send('built_tanks', msg);
+    socket.send('built_tanks', {
+      'built_tanks': await authDb.getBuiltTankNamesForUserId(getUserIdFromSocket(socket)),
+    });
   }
 
-  void onCreateNewTank(ServerWebSocket socket, data) async {
-    if (!isLoggedIn(socket)) {
-      return;
-    }
+  Future<void> onCreateNewTank(ServerWebSocket socket, data) async {
+    if (!isLoggedIn(socket)) return onNotLoggedInError(socket);
+
+    if (!(data is Map) || data['tank_name'] == null || data['code_language'] == null) return onInvalidDataError(socket);
 
     final userId = getUserIdFromSocket(socket);
-
-    final tankName = data['tank_name'];
-    final codeLang = data['code_language'];
 
     final defaultCodes = <String, String>{
       'dart': '''
@@ -591,98 +584,133 @@ BaseTank createTank() => Custom();
       ''',
     };
 
+    if (!defaultCodes.containsKey(data['code_language'])) return onInvalidDataError(socket);
+
     // TODO get default code
-    final defaultCode = defaultCodes[codeLang];
+    final defaultCode = defaultCodes[data['code_language']];
 
-    if (defaultCodes == null) {
-      throw UnimplementedError();
-    }
+    if (await authDb.tankNameExists(userId, data['tank_name'])) return onInvalidDataError(socket);
 
-    if (!(await authDb.tankNameExists(userId, tankName))) {
-      // TODO validate codelang
-      await authDb.saveCodeLangForUserIdWithTankName(userId, tankName, codeLang);
-      await authDb.saveCodeForUserIdWithTankName(userId, tankName, defaultCode);
+    await authDb.saveCodeLangForUserIdWithTankName(userId, data['tank_name'], data['code_language']);
+    await authDb.saveCodeForUserIdWithTankName(userId, data['tank_name'], defaultCode);
 
-      onOpenExistingTank(socket, data);
-    }
+    await onOpenExistingTank(socket, data);
   }
 
-  void onSaveTank(ServerWebSocket socket, data) async {
-    if (!isLoggedIn(socket)) {
-      return;
-    }
+  Future<void> onSaveTank(ServerWebSocket socket, data) async {
+    if (!isLoggedIn(socket)) return onNotLoggedInError(socket);
+
+    if (!(data is Map) || data['tank_name'] == null || data['code'] == null) return onInvalidDataError(socket);
 
     final userId = getUserIdFromSocket(socket);
 
-    final tankName = data['tank_name'];
-    final code = data['code'];
+    if (!await authDb.tankNameExists(userId, data['tank_name'])) return onInvalidDataError(socket);
 
-    // TODO validate code
-
-    if (await authDb.tankNameExists(userId, tankName)) {
-      await authDb.saveCodeForUserIdWithTankName(userId, tankName, code);
-    }
+    await authDb.saveCodeForUserIdWithTankName(userId, data['tank_name'], data['code']);
   }
 
-  void onOpenExistingTank(ServerWebSocket socket, data) async {
-    if (!isLoggedIn(socket)) {
-      return;
-    }
+  Future<void> onOpenExistingTank(ServerWebSocket socket, data) async {
+    if (!isLoggedIn(socket)) return onNotLoggedInError(socket);
+
+    if (!(data is Map) || data['tank_name'] == null) return onInvalidDataError(socket);
 
     final userId = getUserIdFromSocket(socket);
-
-    final tankName = data['tank_name'];
-
-    if (await authDb.tankNameExists(userId, tankName)) {
-      final code = await authDb.getCodeForUserIdWithTankName(userId, tankName);
-
-      final msg = {
-        'code': code,
-        'tank_name': tankName,
-      };
-
-      socket.send('open_existing_tank_success', msg);
-      return;
-    }
-
-    socket.send('open_existing_tank_failure');
-  }
-
-  void onGetSavedTanks(ServerWebSocket socket) async {
-    if (!isLoggedIn(socket)) {
-      return;
-    }
-
-    final userId = getUserIdFromSocket(socket);
-
-    final msg = {'saved_tanks': await authDb.getSavedTankNamesForUserId(userId)};
-
-    socket.send('saved_tanks', msg);
-  }
-
-  void onMakeTakeCopy(ServerWebSocket socket, data) async {
-    if (!isLoggedIn(socket)) {
-      return;
-    }
-
-    final userId = getUserIdFromSocket(socket);
-
-    if (!(data is Map) || data['tank_name'] == null) {
-      return;
-    }
 
     if (await authDb.tankNameExists(userId, data['tank_name'])) {
-      data['tank_name'] = data['tank_name'] + '_copy';
-
-      if (await authDb.tankNameExists(userId, data['tank_name'])) {
-        final code = await authDb.getCodeForUserIdWithTankName(userId, data['tank_name']);
-        final codeLang = await authDb.getCodeLangForUserIdWithTankName(userId, data['tank_name']);
-
-        await authDb.saveCodeLangForUserIdWithTankName(userId, data['tank_name'], codeLang);
-        await authDb.saveCodeForUserIdWithTankName(userId, data['tank_name'], code);
-
-        onOpenExistingTank(socket, data);
-      }
+      socket.send('open_existing_tank_success', {
+        'code': await authDb.getCodeForUserIdWithTankName(userId, data['tank_name']),
+        'tank_name': data['tank_name'],
+      });
+    } else {
+      socket.send('open_existing_tank_failure');
     }
+  }
+
+  Future<void> onGetSavedTanks(ServerWebSocket socket) async {
+    if (!isLoggedIn(socket)) return onNotLoggedInError(socket);
+
+    socket.send('saved_tanks', {
+      'saved_tanks': await authDb.getSavedTankNamesForUserId(getUserIdFromSocket(socket)),
+    });
+  }
+
+  Future<void> onSaveTankAs(ServerWebSocket socket, data) async {
+    if (!isLoggedIn(socket)) return onNotLoggedInError(socket);
+
+    if (!(data is Map) || data['tank_name'] == null || data['new_tank_name'] == null) return onInvalidDataError(socket);
+
+    final userId = getUserIdFromSocket(socket);
+
+    if (!(await authDb.tankNameExists(userId, data['tank_name']))) return onInvalidDataError(socket);
+
+    if (await authDb.tankNameExists(userId, data['new_tank_name'])) return onInvalidDataError(socket);
+
+    final code = await authDb.getCodeForUserIdWithTankName(userId, data['tank_name']);
+    final codeLang = await authDb.getCodeLangForUserIdWithTankName(userId, data['tank_name']);
+
+    await authDb.saveCodeLangForUserIdWithTankName(userId, data['new_tank_name'], codeLang);
+    await authDb.saveCodeForUserIdWithTankName(userId, data['new_tank_name'], code);
+  }
+
+  void onNotLoggedInError(ServerWebSocket socket) {
+    // TODO
+  }
+
+  void onInvalidDataError(ServerWebSocket socket) {
+    // TODO
+  }
+
+  Future<void> onMakeTakeCopy(ServerWebSocket socket, data) async {
+    if (!isLoggedIn(socket)) return onNotLoggedInError(socket);
+
+    if (!(data is Map) || data['tank_name'] == null) return onInvalidDataError(socket);
+
+    final userId = getUserIdFromSocket(socket);
+
+    if (!(await authDb.tankNameExists(userId, data['tank_name']))) return onInvalidDataError(socket);
+
+    data['new_tank_name'] = data['tank_name'];
+
+    do {
+      data['new_tank_name'] = data['new_tank_name'] + '_copy';
+    } while (await authDb.tankNameExists(userId, data['new_tank_name']));
+
+    await onSaveTankAs(socket, data);
+
+    data['tank_name'] = data['new_tank_name'];
+
+    await onOpenExistingTank(socket, data);
+  }
+
+  Future<void> onDeleteTank(ServerWebSocket socket, data) async {
+    if (!isLoggedIn(socket)) return onNotLoggedInError(socket);
+
+    if (!(data is Map) || data['tank_name'] == null) return onInvalidDataError(socket);
+
+    final userId = getUserIdFromSocket(socket);
+
+    if (!(await authDb.tankNameExists(userId, data['tank_name']))) return onInvalidDataError(socket);
+
+    await authDb.deleteTank(userId, data['tank_name']);
+  }
+
+  Future<void> onRenameTank(ServerWebSocket socket, data) async {
+    if (!isLoggedIn(socket)) return onNotLoggedInError(socket);
+
+    if (!(data is Map) || data['tank_name'] == null || data['new_tank_name'] == null) return onInvalidDataError(socket);
+
+    final userId = getUserIdFromSocket(socket);
+
+    if (!(await authDb.tankNameExists(userId, data['tank_name']))) return onInvalidDataError(socket);
+
+    if (await authDb.tankNameExists(userId, data['new_tank_name'])) return onInvalidDataError(socket);
+
+    await onSaveTankAs(socket, data);
+
+    await authDb.deleteTank(userId, data['tank_name']);
+
+    data['tank_name'] = data['new_tank_name'];
+
+    await onOpenExistingTank(socket, data);
   }
 }

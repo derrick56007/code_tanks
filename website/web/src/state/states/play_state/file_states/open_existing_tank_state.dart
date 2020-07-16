@@ -66,8 +66,8 @@ class OpenExistingTankState extends State {
 
   @override
   void show() {
-    openExistingTankState.style.display = '';
-
-    client.send('get_saved_tanks');
+    openExistingTankState
+      ..style.display = ''
+      ..click();
   }
 }

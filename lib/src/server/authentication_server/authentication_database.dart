@@ -63,9 +63,6 @@ class AuthenticationDatabase {
     return results == '1';
   }
 
-  // Future<String> getNextBuildId() async =>
-  //   (await send_object(['INCR', 'next_build_id'])).toString();
-
   Future<String> getCodeUploadUuid(String hashedCodeUpload, String codeLangWithCode) async {
     final primaryKey = 'hashed_code_upload:$hashedCodeUpload';
     return (await send_object(['HGET', primaryKey, codeLangWithCode])).toString();
@@ -142,4 +139,10 @@ class AuthenticationDatabase {
 
     return results == '1';
   }  
+
+  Future<void> deleteTank(String userId, String tankName) async {
+    await send_object(['HDEL', 'user:$userId:tanks', tankName]);
+    await send_object(['HDEL', 'user:$userId:tank_codes', tankName]);
+    await send_object(['HDEL', 'user:$userId:tank_code_lang', tankName]);
+  }
 }

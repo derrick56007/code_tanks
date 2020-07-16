@@ -161,9 +161,29 @@ html, body {
   padding-bottom: 3px;
   border-right: rgba(0,0,0,1) 0.5px solid;
   cursor: pointer;
+  display: flex;  
 }
 
 .selected-tab {
   background: #272822;
   color: white;
+}
+
+canvas {
+  margin: auto;
+  width: 100%;
+  /* height: 100%; */
+  padding: 0;
+}
+
+.tab-icon {
+  font-size: 1em; 
+  margin: auto; 
+  margin-left: 10px;
+}
+
+.tab-icon:hover {
+  color: white;
+  background: red;
+  border-radius: 100%;
 }

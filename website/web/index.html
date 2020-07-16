@@ -159,7 +159,8 @@
     </div>
   </div>
 
-  <div id="play-card" class="" style="display: none; background: white; position: relative; flex-direction: column; box-sizing: border-box;">
+  <div id="play-card" class=""
+    style="display: none; background: white; position: relative; flex-direction: column; box-sizing: border-box;">
     <div>
 
       <div style="display: flex; position: relative; z-index: 1000;" class="mdc-elevation--z3">
@@ -236,7 +237,7 @@
           <div class="mdc-button__ripple"></div>
           <span class="mdc-button__label">Build</span>
           <i class="material-icons mdc-button__icon" aria-hidden="true">
-            save
+            build
           </i>
         </button>
       </div>
@@ -274,7 +275,7 @@
                         <div class="mdc-button__ripple"></div>
                         <span class="mdc-button__label">Add</span>
                         <i class="material-icons mdc-button__icon" aria-hidden="true">
-                          send
+                          add_circle
                         </i>
                       </button>
                       <button id="remove-btn" class="mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple"
@@ -282,7 +283,7 @@
                         <div class="mdc-button__ripple"></div>
                         <span class="mdc-button__label">Remove</span>
                         <i class="material-icons mdc-button__icon" aria-hidden="true">
-                          send
+                          remove_circle
                         </i>
                       </button>
 
@@ -297,7 +298,7 @@
                       <div class="mdc-button__ripple"></div>
                       <span class="mdc-button__label">Cancel</span>
                       <i class="material-icons mdc-button__icon" aria-hidden="true">
-                        send
+                        cancel
                       </i>
                     </button>
                     <button id="start-btn" class="mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple">
@@ -311,7 +312,13 @@
                 </div>
               </div>
 
-              <div id="view-state" style="display: none;">
+              <div id="view-state" style="display: none; width: 100%; flex-direction: column; overflow: auto;"
+                class="custom-scroll custom-scroll-dark">
+                <!-- <div style="height: 100%; display: flex;">
+                  <div style="margin: auto;"> -->
+                <canvas id="stage"></canvas>
+                <!-- </div>
+                </div> -->
                 <div id="settings-bottom" style="display: flex; margin: 10px;">
                   <div style="width: 100%; justify-content: space-evenly; display: flex; flex-direction: row;">
                     <button id="close-view-btn" class="mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple">
@@ -346,7 +353,9 @@
         </div>
       </div>
     </div>
-    <div id="play-card-footer" style="border-top: black 0.5px solid; width: 100%; height: 30px; display: flex; justify-content: center;">
+    <div id="play-card-footer"
+      style="width: 100%; height: 30px; display: flex; justify-content: center; position: relative; z-index: 10000;"
+      class="mdc-elevation--z3">
       <div style="margin: auto;">code_tank v0.1</div>
     </div>
   </div>
@@ -405,7 +414,7 @@
               <div class="mdc-button__ripple"></div>
               <span class="mdc-button__label">Cancel</span>
               <i class="material-icons mdc-button__icon" aria-hidden="true">
-                send
+                cancel
               </i>
             </button>
             <button id="submit-create-tank-btn" style="margin-left: 10px;" class="mdc-button mdc-button--raised"
@@ -416,13 +425,6 @@
                 send
               </i>
             </button>
-            <!-- <button id="start-btn" class="mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple">
-              <div class="mdc-button__ripple"></div>
-              <span class="mdc-button__label">Start</span>
-              <i class="material-icons mdc-button__icon" aria-hidden="true">
-                send
-              </i>
-            </button>  -->
           </div>
         </div>
       </div>
@@ -445,29 +447,141 @@
               <div class="mdc-button__ripple"></div>
               <span class="mdc-button__label">Cancel</span>
               <i class="material-icons mdc-button__icon" aria-hidden="true">
-                send
+                cancel
               </i>
             </button>
             <button id="submit-open-existing-tank-btn" style="margin-left: 10px;" class="mdc-button mdc-button--raised"
-              data-mdc-auto-init="MDCRipple">
+              data-mdc-auto-init="MDCRipple" disabled>
               <div class="mdc-button__ripple"></div>
               <span class="mdc-button__label">Open</span>
               <i class="material-icons mdc-button__icon" aria-hidden="true">
                 send
               </i>
             </button>
-            <!-- <button id="start-btn" class="mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple">
-              <div class="mdc-button__ripple"></div>
-              <span class="mdc-button__label">Start</span>
-              <i class="material-icons mdc-button__icon" aria-hidden="true">
-                send
-              </i>
-            </button>  -->
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <div id="save-as-tank-state" style="display: none;">
+    <div class="modal-backdrop"></div>
+    <div class="center mdc-card" style="padding: 10px; z-index: 11;">
+      <h2 style="text-align: center;">Save Tank As</h2>
+      <div class="mdc-row" style="width: 100%;">
+        <!-- Render textfield component -->
+        <label class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField" style="width: 100%;">
+          <input id="save-as-tank-name" type="text" class="mdc-text-field__input" aria-labelledby="tank-name-label">
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label" id="tank-name-label">Tank Name</span>
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+        </label>
+      </div>
+
+      <div class="mdc-row">
+        <div style="display: flex; margin: 10px;">
+          <div style="width: 100%; justify-content: space-evenly; display: flex; flex-direction: row;">
+            <button id="cancel-save-as-tank-btn" class="mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple">
+              <div class="mdc-button__ripple"></div>
+              <span class="mdc-button__label">Cancel</span>
+              <i class="material-icons mdc-button__icon" aria-hidden="true">
+                cancel
+              </i>
+            </button>
+            <button id="submit-save-as-tank-btn" style="margin-left: 10px;" class="mdc-button mdc-button--raised"
+              data-mdc-auto-init="MDCRipple" disabled>
+              <div class="mdc-button__ripple"></div>
+              <span class="mdc-button__label">Create</span>
+              <i class="material-icons mdc-button__icon" aria-hidden="true">
+                send
+              </i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="delete-confirmation-state" style="display: none;">
+    <div class="modal-backdrop"></div>
+    <div class="center mdc-card" style="padding: 10px; z-index: 11;">
+      <h2 style="text-align: center;">Delete Tank?</h2>
+      <div class="mdc-row" style="width: 100%;">
+        <!-- Render textfield component -->
+        <h3 id="delete-confirmation-tank-name" style="text-align: center; margin-top: 0;"></h3>
+      </div>
+
+      <div class="mdc-row">
+        <div style="display: flex; margin: 10px;">
+          <div style="width: 100%; justify-content: space-evenly; display: flex; flex-direction: row;">
+            <button id="cancel-delete-confirmation-tank-btn" class="mdc-button mdc-button--raised"
+              data-mdc-auto-init="MDCRipple">
+              <div class="mdc-button__ripple"></div>
+              <span class="mdc-button__label">Cancel</span>
+              <i class="material-icons mdc-button__icon" aria-hidden="true">
+                cancel
+              </i>
+            </button>
+            <button id="submit-delete-confirmation-tank-btn" style="margin-left: 10px;"
+              class="mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple">
+              <div class="mdc-button__ripple"></div>
+              <span class="mdc-button__label">Delete</span>
+              <i class="material-icons mdc-button__icon" aria-hidden="true">
+                send
+              </i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="rename-tank-state" style="display: none;">
+    <div class="modal-backdrop"></div>
+    <div class="center mdc-card" style="padding: 10px; z-index: 11;">
+      <h2 style="text-align: center;">Rename Tank</h2>
+      <div class="mdc-row" style="width: 100%;">
+        <!-- Render textfield component -->
+        <label class="mdc-text-field mdc-text-field--outlined" data-mdc-auto-init="MDCTextField" style="width: 100%;">
+          <input id="rename-tank-name" type="text" class="mdc-text-field__input" aria-labelledby="tank-name-label">
+          <span class="mdc-notched-outline">
+            <span class="mdc-notched-outline__leading"></span>
+            <span class="mdc-notched-outline__notch">
+              <span class="mdc-floating-label" id="tank-name-label">Tank Name</span>
+            </span>
+            <span class="mdc-notched-outline__trailing"></span>
+          </span>
+        </label>
+      </div>
+
+      <div class="mdc-row">
+        <div style="display: flex; margin: 10px;">
+          <div style="width: 100%; justify-content: space-evenly; display: flex; flex-direction: row;">
+            <button id="cancel-rename-tank-btn" class="mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple">
+              <div class="mdc-button__ripple"></div>
+              <span class="mdc-button__label">Cancel</span>
+              <i class="material-icons mdc-button__icon" aria-hidden="true">
+                cancel
+              </i>
+            </button>
+            <button id="submit-rename-tank-btn" style="margin-left: 10px;" class="mdc-button mdc-button--raised"
+              data-mdc-auto-init="MDCRipple" disabled>
+              <div class="mdc-button__ripple"></div>
+              <span class="mdc-button__label">Submit</span>
+              <i class="material-icons mdc-button__icon" aria-hidden="true">
+                send
+              </i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Required Material Web JavaScript library -->
   <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
 

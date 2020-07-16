@@ -8,8 +8,7 @@ import 'package:path/path.dart' as path;
 class BuildServer extends DummyServer {
   final String fileDir;
 
-  BuildServer(String address, int port, this.fileDir,
-      String authenticationServerAddress, int authenticationServerPort)
+  BuildServer(String address, int port, this.fileDir, String authenticationServerAddress, int authenticationServerPort)
       : super('build', authenticationServerAddress, authenticationServerPort);
 
   @override
@@ -28,18 +27,15 @@ class BuildServer extends DummyServer {
 
     await BuildServerDockerCommands.copyDockerFiles(fp, codeLang);
     await BuildServerDockerCommands.createCustomFile(fp, codeLang, code);
-    final exitCode =
-        await BuildServerDockerCommands.build(fp, uuid, authenticationSocket);
+    final exitCode = await BuildServerDockerCommands.build(fp, uuid, authenticationSocket);
 
     if (exitCode != 0) {
-
       final errorMsg = {'code': exitCode};
 
       authenticationSocket.send('build_code_error_$uuid', errorMsg);
     } else {
       // check if save to registry works
-      await BuildServerDockerCommands.saveToRegistry(
-          fp, uuid, authenticationSocket);
+      await BuildServerDockerCommands.saveToRegistry(fp, uuid, authenticationSocket);
 
       authenticationSocket.send('build_code_success_$uuid');
     }
