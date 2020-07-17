@@ -1,41 +1,26 @@
 import 'dart:async';
 import 'dart:html';
 
-import '../../client_web_socket/client_websocket.dart';
-import '../state.dart';
-import '../state_manager.dart';
+import 'package:code_tanks/code_tanks_client.dart';
 
 class RegisterState extends State {
-  final Element registerCard = querySelector('#register-card');
-
   final InputElement registerUsernameEl = querySelector('#register-username');
-  final InputElement registerPassword =
-      document.querySelector('#register-password');
-  final InputElement registerPasswordConfirm =
-      document.querySelector('#register-password-confirm');
-
-  final registerBtn = querySelector('#register-btn');
 
   StreamSubscription submitSub;
 
-  RegisterState(ClientWebSocket client, StateManager sm) : super(client, sm) {
-    registerBtn.onClick.listen((_) {
-      registerBtn.blur();
+  RegisterState(ClientWebSocket client, StateManager sm) : super(client, sm, querySelector('#register-card')) {
+    querySelector('#register-btn').onClick.listen((_) {
       submitRegister();
     });
 
-    querySelector('#sign-in-btn')
-        .onClick
-        .listen((_) => stateManager.pushState('login'));
+    querySelector('#sign-in-btn').onClick.listen((_) => stateManager.pushState('login'));
 
-    client
-      ..on('register_successful', _registerSuccessful)
-      ..on('register_failure', _registerFailure);
+    client..on('register_successful', _registerSuccessful)..on('register_failure', _registerFailure);
   }
 
   @override
   void show() {
-    registerCard.style.display = '';
+    stateElement.style.display = '';
 
     registerUsernameEl
       ..autofocus = true
@@ -50,7 +35,7 @@ class RegisterState extends State {
 
   @override
   void hide() {
-    registerCard.style.display = 'none';
+    stateElement.style.display = 'none';
     submitSub?.cancel();
   }
 
@@ -59,6 +44,9 @@ class RegisterState extends State {
       print('Not connected');
       return;
     }
+
+    final InputElement registerPassword = document.querySelector('#register-password');
+    final InputElement registerPasswordConfirm = document.querySelector('#register-password-confirm');
 
     final username = registerUsernameEl.value.trim();
     final password = registerPassword.value.trim();

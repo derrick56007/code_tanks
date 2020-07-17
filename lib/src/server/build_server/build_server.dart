@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import '../server_common/dummy_server.dart';
@@ -40,6 +41,8 @@ class BuildServer extends DummyServer {
       authenticationSocket.send('build_code_success_$uuid');
     }
 
-    await Directory(fp).delete(recursive: true);
+    Timer(const Duration(seconds: 1), () async {
+      await Directory(fp).delete(recursive: true);
+    });
   }
 }

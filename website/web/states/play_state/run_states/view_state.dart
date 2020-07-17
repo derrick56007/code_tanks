@@ -1,17 +1,13 @@
 import 'dart:async';
 import 'dart:html';
 
+import 'package:code_tanks/code_tanks_client.dart';
 import 'package:stagexl/stagexl.dart';
-
-import '../../../../client_web_socket/client_websocket.dart';
-import '../../../state.dart';
-import '../../../state_manager.dart';
 
 class ViewState extends State {
   static const gameWidth = 800;
   static const gameHeight = 800;
 
-  final Element viewDiv = querySelector('#view-state');
   final ButtonElement closeViewBtn = querySelector('#close-view-btn');
 
   StreamSubscription closeViewSub;
@@ -26,7 +22,8 @@ class ViewState extends State {
 
   TextureAtlas textureAtlas;
 
-  ViewState(ClientWebSocket client, StateManager stateManager) : super(client, stateManager) {
+  ViewState(ClientWebSocket client, StateManager stateManager)
+      : super(client, stateManager, querySelector('#view-state')) {
     client //
       ..on('run_game_response', onRunGameResponse);
   }
@@ -35,22 +32,18 @@ class ViewState extends State {
     // TODO validate data
     print('received frames');
     print(data);
-
-    // runBtn.disabled = false;
-
-    // buildBtn.disabled = false;
   }
 
   @override
   void hide() {
-    viewDiv.style.display = 'none';
+    stateElement.style.display = 'none';
 
     closeViewSub?.cancel();
   }
 
   @override
   void show() async {
-    viewDiv.style.display = 'flex';
+    stateElement.style.display = 'flex';
 
     closeViewSub = closeViewBtn.onClick.listen((event) {
       stateManager.pushState('landing');

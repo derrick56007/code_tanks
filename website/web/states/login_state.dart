@@ -1,39 +1,28 @@
 import 'dart:async';
 import 'dart:html';
 
-import '../../client_web_socket/client_websocket.dart';
-import '../state.dart';
-import '../state_manager.dart';
+import 'package:code_tanks/code_tanks_client.dart';
 
 class LoginState extends State {
-  final Element loginCard = querySelector('#login-card');
-
   final InputElement loginUsernameEl = querySelector('#login-username');
-  final InputElement loginPassword = document.querySelector('#login-password');
-  final Element loginBtn = querySelector('#login-btn');
 
   StreamSubscription submitSub;
 
-  LoginState(ClientWebSocket client, StateManager sm) : super(client, sm) {
+  LoginState(ClientWebSocket client, StateManager sm) : super(client, sm, querySelector('#login-card')) {
     client.onClose.listen(_logoutSuccessful);
 
-    client
-      ..on('login_successful', _loginSuccessful)
-      ..on('logout_successful', _logoutSuccessful);
+    client..on('login_successful', _loginSuccessful)..on('logout_successful', _logoutSuccessful);
 
-    loginBtn.onClick.listen((_) {
-      loginBtn.blur();
+    querySelector('#login-btn').onClick.listen((_) {
       submitLogin();
     });
 
-    querySelector('#sign-up-btn')
-        .onClick
-        .listen((_) => stateManager.pushState('register'));
+    querySelector('#sign-up-btn').onClick.listen((_) => stateManager.pushState('register'));
   }
 
   @override
   void show() {
-    loginCard.style.display = '';
+    stateElement.style.display = '';
 
     loginUsernameEl
       ..autofocus = true
@@ -48,7 +37,7 @@ class LoginState extends State {
 
   @override
   void hide() {
-    loginCard.style.display = 'none';
+    stateElement.style.display = 'none';
     submitSub?.cancel();
   }
 
@@ -64,6 +53,7 @@ class LoginState extends State {
       print('Not a valid username');
       return;
     }
+    final InputElement loginPassword = querySelector('#login-password');
 
     final password = loginPassword.value.trim();
 
