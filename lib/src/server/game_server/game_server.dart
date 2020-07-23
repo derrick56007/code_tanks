@@ -1,14 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
-
-import 'package:code_tanks/code_tanks_server_common.dart';
-import 'package:code_tanks/src/server/game_server/game_server_docker_commands.dart';
-import 'package:code_tanks/src/server/game_server/logic/systems/render_system.dart';
 
 import 'package:pedantic/pedantic.dart';
 
+import '../../../code_tanks_server_common.dart';
+import 'game_server_docker_commands.dart';
+import 'systems/render_system.dart';
+
 import '../server_common/dummy_server.dart';
-import 'logic/game.dart';
+import 'game.dart';
 
 class GameServer extends DummyServer {
   final String address;
@@ -108,6 +109,10 @@ class GameServer extends DummyServer {
       final allFrames = renderSys.frames.map((frame) => frame.toList()).toList(growable: false);
 
       final msg = {'frames': allFrames};
+
+      File('frames.json') //
+        ..createSync()
+        ..writeAsStringSync(jsonEncode(msg));
 
       gameIdToGameInstance.remove(gameId);
 

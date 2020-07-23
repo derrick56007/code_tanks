@@ -7,48 +7,48 @@ abstract class BaseTank {
 
   void onHitByBulletEvent(HitByBulletEvent e) {}
 
-  void ahead(int amount) {
-    _createAndAddCommandWithArgument('ahead', amount);
+  void aheadBy(int amount) {
+    _createAndAddCommandWithArgument('ahead_by', amount);
   }
 
-  void setAhead(int amount) {
-    _createAndAddCommandWithArgument('set_ahead', amount);
+  void setAheadBy(int amount) {
+    _createAndAddCommandWithArgument('set_ahead_by', amount);
   }
 
-  void back(int amount) {
-    _createAndAddCommandWithArgument('back', amount);
+  void backBy(int amount) {
+    _createAndAddCommandWithArgument('back_by', amount);
   }
 
-  void setBack(int amount) {
-    _createAndAddCommandWithArgument('set_back', amount);
+  void setBackBy(int amount) {
+    _createAndAddCommandWithArgument('set_back_by', amount);
   }
 
   void requestInfo(String infoType) {
     _createAndAddCommandWithArgument('request_info', infoType);
   }
 
-  void rotateTank(int amount) {
-    _createAndAddCommandWithArgument('rotate_tank', amount);
+  void rotateTankBy(int amount) {
+    _createAndAddCommandWithArgument('rotate_tank_by', amount);
   }
 
-  void setRotateTank(int amount) {
-    _createAndAddCommandWithArgument('set_rotate_tank', amount);
+  void setRotateTankBy(int amount) {
+    _createAndAddCommandWithArgument('set_rotate_tank_by', amount);
   }  
 
-  void rotateGun(int amount) {
-    _createAndAddCommandWithArgument('rotate_gun', amount);
+  void rotateGunBy(int amount) {
+    _createAndAddCommandWithArgument('rotate_gun_by', amount);
   }  
 
-  void setRotateGun(int amount) {
-    _createAndAddCommandWithArgument('set_rotate_gun', amount);
+  void setRotateGunBy(int amount) {
+    _createAndAddCommandWithArgument('set_rotate_gun_by', amount);
   }
 
   void rotateRadar(int amount) {
     _createAndAddCommandWithArgument('rotate_radar', amount);
   }
 
-  void setRotateRadar(int amount) {
-    _createAndAddCommandWithArgument('set_rotate_radar', amount);
+  void setRotateRadarBy(int amount) {
+    _createAndAddCommandWithArgument('set_rotate_radar_by', amount);
   }
 
   void setRadarToRotateWithGun(bool b) {

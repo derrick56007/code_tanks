@@ -13,6 +13,8 @@ dependencies:
   quiver: any
   crypto: any
   password_hash: any
+  stagexl: ^1.4.5
+  codemirror: ^0.5.17+5.54.0
 
 dev_dependencies:
   pedantic: ^1.9.0

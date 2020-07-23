@@ -37,6 +37,7 @@ class SelectList {
     final selectable = Element.html(html);
     selectable.onClick.listen((_) => _selectableOnClick(selectable));
     parentListElement.children.add(selectable);
+    onChange(null);
     return selectable;
   }
 
@@ -64,5 +65,9 @@ class SelectList {
     }
   }
 
-  void clear() => parentListElement.children.clear();
+  void clear() {
+    parentListElement.children.clear();
+    selected = null;
+    onChange(null);
+  }
 }

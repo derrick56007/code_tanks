@@ -32,6 +32,8 @@ void handleSocketAndBot(socket, BaseTank bot) {
     final msg = {'commands': bot.currentCommands};
     socket.send(msgType, msg);
     bot.currentCommands.clear();
+
+    print('sent commands');
   }
 
   void onRunGameCommandsRequest(_) {
@@ -47,6 +49,8 @@ void handleSocketAndBot(socket, BaseTank bot) {
 
   void onEventCommandsRequest(data) {
     print('received event_commands_request');
+
+    print(data);
 
     // TODO validate data
     final eventName = data['event_name'];

@@ -301,7 +301,7 @@
                         cancel
                       </i>
                     </button>
-                    <button id="start-btn" class="mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple">
+                    <button id="start-btn" class="mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple" disabled>
                       <div class="mdc-button__ripple"></div>
                       <span class="mdc-button__label">Start</span>
                       <i class="material-icons mdc-button__icon" aria-hidden="true">
@@ -311,6 +311,12 @@
                   </div>
                 </div>
               </div>
+
+              <div id="loading-state" style="display: none; width: 100%; height: 100%;">
+                <div style="margin: auto;">
+                  loading...
+                </div>
+              </div>              
 
               <div id="view-state" style="display: none; width: 100%; flex-direction: column; overflow: auto;"
                 class="custom-scroll custom-scroll-dark">
@@ -328,13 +334,6 @@
                         send
                       </i>
                     </button>
-                    <!-- <button id="start-btn" class="mdc-button mdc-button--raised" data-mdc-auto-init="MDCRipple">
-                      <div class="mdc-button__ripple"></div>
-                      <span class="mdc-button__label">Start</span>
-                      <i class="material-icons mdc-button__icon" aria-hidden="true">
-                        send
-                      </i>
-                    </button>  -->
                   </div>
                 </div>
               </div>
@@ -356,7 +355,7 @@
     <div id="play-card-footer"
       style="width: 100%; height: 30px; display: flex; justify-content: center; position: relative; z-index: 10000;"
       class="mdc-elevation--z3">
-      <div style="margin: auto;">code_tank v0.1</div>
+      <div style="margin: auto;">code_tanks v0.1</div>
     </div>
   </div>
 
@@ -626,6 +625,9 @@
           menu.setAnchorCorner(mdc.menu.Corner.BOTTOM_LEFT);
           menu.setAnchorElement(buttonEl);
         });
+
+        // new mdc.circularProgress.MDCCircularProgress(document.querySelector('.mdc-circular-progress'));
+        
       }, false);
 
   </script>

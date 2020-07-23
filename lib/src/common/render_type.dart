@@ -1,0 +1,4 @@
+enum RenderType {
+  tank,
+  bullet
+}

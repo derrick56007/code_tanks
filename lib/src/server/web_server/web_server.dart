@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:code_tanks/src/server/server_common/base_server.dart';
 import 'package:http_server/http_server.dart';
+
+import '../server_common/base_server.dart';
 
 import '../../../code_tanks_server_common.dart';
 

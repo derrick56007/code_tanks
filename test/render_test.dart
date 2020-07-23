@@ -1,7 +1,7 @@
 
 import 'package:code_tanks/src/common/test_socket.dart';
-import 'package:code_tanks/src/server/game_server/logic/game.dart';
-import 'package:code_tanks/src/server/game_server/logic/systems/render_system.dart';
+import 'package:code_tanks/src/server/game_server/game.dart';
+import 'package:code_tanks/src/server/game_server/systems/render_system.dart';
 import 'package:test/test.dart';
 
 import 'package:code_tanks/code_tanks_dart_api.dart';
@@ -11,22 +11,22 @@ class Custom extends BaseTank {
   void run() {
     setRadarToRotateWithGun(true);
 
-    ahead(2);
-    rotateGun(2);
-    back(2);
-    setRotateRadar(2);
+    aheadBy(2);
+    rotateGunBy(2);
+    backBy(2);
+    setRotateRadarBy(2);
 
-    setRotateGun(2);
-    ahead(2);
+    setRotateGunBy(2);
+    aheadBy(2);
   }
 
   @override
   void onScanTank(ScanTankEvent e) {
-    back(2);
-    setRotateRadar(2);
+    backBy(2);
+    setRotateRadarBy(2);
 
-    setRotateGun(2);
-    ahead(2);
+    setRotateGunBy(2);
+    aheadBy(2);
   }
 }
 
