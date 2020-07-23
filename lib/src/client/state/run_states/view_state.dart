@@ -66,7 +66,9 @@ class ViewState extends State {
           barrel
             ..x = renderable['render_info']['x']
             ..y = renderable['render_info']['y']
-            ..rotation = renderable['render_info']['rotation'];
+            ..rotation = renderable['render_info']['rotation']
+            ..pivotX = barrel.width / 2
+            ..pivotY = barrel.height / 2;
 
           print('new');
           print(renderable);

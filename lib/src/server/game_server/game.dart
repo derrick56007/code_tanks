@@ -4,7 +4,7 @@ import 'package:code_tanks/src/server/game_server/components/collision/collider_
 import '../../../code_tanks_entity_component_system.dart';
 
 import 'components/collision/health_component.dart';
-import 'components/collision/vector_2d.dart';
+import '../server_utils/vector_2d.dart';
 import 'components/game_command/game_commands_component.dart';
 import 'components/game_event/game_event_component.dart';
 import 'components/render_component.dart';

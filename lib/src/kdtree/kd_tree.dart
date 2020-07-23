@@ -1,10 +1,10 @@
 import 'dart:math';
 
-import '../../../server_utils/utils.dart';
-import '../../../server_utils/tuple.dart';
+import '../server/server_utils/sort_sublist.dart';
+import '../server/server_utils/tuple.dart';
 
 import 'kd_node.dart';
-import 'vector_2d.dart';
+import '../server/server_utils/vector_2d.dart';
 
 class KDTree {
   KDNode root;

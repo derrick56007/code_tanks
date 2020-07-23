@@ -1,7 +1,6 @@
-import 'package:code_tanks/src/server/game_server/components/collision/kd_tree.dart';
-import 'package:code_tanks/src/server/game_server/components/collision/vector_2d.dart';
-import 'package:code_tanks/src/server/server_utils/tuple.dart';
 import 'package:test/test.dart';
+
+import 'package:code_tanks/code_tanks_kdtree.dart';
 
 class NaiveSearch {
   List<Vector2D> points;

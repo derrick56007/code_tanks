@@ -1,6 +1,7 @@
-import 'dart:math';
 
 import '../../systems/physics_system.dart';
+
+import '../../../server_utils/angle.dart';
 
 import 'game_command_name.dart';
 
@@ -61,16 +62,27 @@ class GameCommand {
     return List.generate(val.abs(), (_) => GameCommand(GameCommandName.backBy, val: 1, isEndOfTurnCommand: true));
   }
 
-  static List<GameCommand> rotateGunBy(int val) {
-    return List.generate(val.abs(), (_) => GameCommand(GameCommandName.rotateGunBy, val: 1));
+  static List<GameCommand> rotateGunBy(int val, {bool isEndOfTurnCommand = false}) {
+    final radians = val.toRadians();
+    final commands = <GameCommand>[];
+
+    for (var i = 0; i < radians / PhysicsSystem.maxAngularVelocity; i++) {
+      commands.add(GameCommand(GameCommandName.rotateGunBy,
+          val: PhysicsSystem.maxAngularVelocity, isEndOfTurnCommand: isEndOfTurnCommand));
+    }
+
+    final remainder = radians % PhysicsSystem.maxAngularVelocity;
+    if (remainder != 0) {
+      commands.add(GameCommand(GameCommandName.rotateGunBy, val: remainder, isEndOfTurnCommand: isEndOfTurnCommand));
+    }
+
+    return commands;
   }
 
-  static List<GameCommand> setRotateGunBy(int val) {
-    return List.generate(val.abs(), (_) => GameCommand(GameCommandName.rotateGunBy, val: 1, isEndOfTurnCommand: true));
-  }
+  static List<GameCommand> setRotateGunBy(int val) => rotateGunBy(val, isEndOfTurnCommand: true);
 
   static List<GameCommand> rotateTankBy(int val, {bool isEndOfTurnCommand = false}) {
-    final radians = toRadians(val);
+    final radians = val.toRadians();
     final commands = <GameCommand>[];
 
     for (var i = 0; i < radians / PhysicsSystem.maxAngularVelocity; i++) {
@@ -88,14 +100,24 @@ class GameCommand {
 
   static List<GameCommand> setRotateTankBy(int val) => rotateTankBy(val, isEndOfTurnCommand: true);
 
-  static List<GameCommand> rotateRadarBy(int val) {
-    return List.generate(val.abs(), (_) => GameCommand(GameCommandName.rotateRadarBy, val: 1));
+  static List<GameCommand> rotateRadarBy(int val, {bool isEndOfTurnCommand = false}) {
+    final radians = val.toRadians();
+    final commands = <GameCommand>[];
+
+    for (var i = 0; i < radians / PhysicsSystem.maxAngularVelocity; i++) {
+      commands.add(GameCommand(GameCommandName.rotateRadarBy,
+          val: PhysicsSystem.maxAngularVelocity, isEndOfTurnCommand: isEndOfTurnCommand));
+    }
+
+    final remainder = radians % PhysicsSystem.maxAngularVelocity;
+    if (remainder != 0) {
+      commands.add(GameCommand(GameCommandName.rotateRadarBy, val: remainder, isEndOfTurnCommand: isEndOfTurnCommand));
+    }
+
+    return commands;
   }
 
-  static List<GameCommand> setRotateRadarBy(int val) {
-    return List.generate(
-        val.abs(), (_) => GameCommand(GameCommandName.rotateRadarBy, val: 1, isEndOfTurnCommand: true));
-  }
+  static List<GameCommand> setRotateRadarBy(int val) => rotateRadarBy(val, isEndOfTurnCommand: true);
 
   static List<GameCommand> setRadarToRotateWithGun(bool val) {
     return [GameCommand(GameCommandName.setRadarToRotateWithGun, val: val)];
@@ -119,8 +141,6 @@ class GameCommand {
 
   static List<GameCommand> commandsfromStringWithVal(String str, val) =>
       _playerCommandStringToGameCommandGenerator[str](val);
-
-  static num toRadians(num degrees) => degrees * pi / 180;
 
   @override
   String toString() => name.toString();

@@ -36,7 +36,7 @@ class RenderSystem extends System {
       PhysicsComponent physComp = entity.getComponent(PhysicsComponent);
 
       renderInfo['x'] = physComp.position.features[0];
-      renderInfo['y'] = physComp.position.features[0];
+      renderInfo['y'] = physComp.position.features[1];
     }
 
     final renderable = Renderable(entity.id, renderComp.renderType, renderInfo);
