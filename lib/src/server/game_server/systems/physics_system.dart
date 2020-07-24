@@ -40,8 +40,10 @@ class PhysicsSystem extends System {
       ..position.features[0] += physComp.velocity * sin(physComp.rotation.toDegrees())
       ..position.features[1] += physComp.velocity * cos(physComp.rotation.toDegrees())
       ..rotation = (physComp.rotation + rotationDelta) % tau
-      ..velocity *= velocityDampeningRate
-      ..angularVelocity *= angularVelocityDampeningRate;
+      // ..velocity *= velocityDampeningRate
+      // ..angularVelocity *= angularVelocityDampeningRate;
+      ..velocity *= 0
+      ..angularVelocity *= 0;
 
     // custom processing for tanks (gun and radar)
 
@@ -52,8 +54,10 @@ class PhysicsSystem extends System {
       tankComp
         ..gunRotation = (tankComp.gunRotation + gunRotationDelta) % tau
         ..radarRotation = (tankComp.radarRotation + tankComp.radarAngularVelocity) % tau
-        ..gunAngularVelocity *= angularVelocityDampeningRate
-        ..radarAngularVelocity *= angularVelocityDampeningRate;
+        // ..gunAngularVelocity *= angularVelocityDampeningRate
+        // ..radarAngularVelocity *= angularVelocityDampeningRate;
+        ..gunAngularVelocity *= 0
+        ..radarAngularVelocity *= 0;        
 
       if (tankComp.gunRotatesWithTank) {
         tankComp.gunRotation = (tankComp.gunRotation + rotationDelta) % tau;

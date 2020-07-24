@@ -66,7 +66,7 @@ class GameCommand {
     final radians = val.toRadians();
     final commands = <GameCommand>[];
 
-    for (var i = 0; i < radians / PhysicsSystem.maxAngularVelocity; i++) {
+    for (var i = 0; i < radians ~/ PhysicsSystem.maxAngularVelocity; i++) {
       commands.add(GameCommand(GameCommandName.rotateGunBy,
           val: PhysicsSystem.maxAngularVelocity, isEndOfTurnCommand: isEndOfTurnCommand));
     }
@@ -85,7 +85,7 @@ class GameCommand {
     final radians = val.toRadians();
     final commands = <GameCommand>[];
 
-    for (var i = 0; i < radians / PhysicsSystem.maxAngularVelocity; i++) {
+    for (var i = 0; i < radians ~/ PhysicsSystem.maxAngularVelocity; i++) {
       commands.add(GameCommand(GameCommandName.rotateTankBy,
           val: PhysicsSystem.maxAngularVelocity, isEndOfTurnCommand: isEndOfTurnCommand));
     }
@@ -104,7 +104,7 @@ class GameCommand {
     final radians = val.toRadians();
     final commands = <GameCommand>[];
 
-    for (var i = 0; i < radians / PhysicsSystem.maxAngularVelocity; i++) {
+    for (var i = 0; i < radians ~/ PhysicsSystem.maxAngularVelocity; i++) {
       commands.add(GameCommand(GameCommandName.rotateRadarBy,
           val: PhysicsSystem.maxAngularVelocity, isEndOfTurnCommand: isEndOfTurnCommand));
     }

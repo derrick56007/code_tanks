@@ -78,7 +78,7 @@ class ViewState extends State {
           newEntities[renderable['id']] = barrel;
         } else {
           // update
-          print('update ${renderable['id']}');
+          // print('update ${renderable['id']}');
 
           // TODO update different render_type
           final e = entities[renderable['id']];
@@ -86,6 +86,8 @@ class ViewState extends State {
             ..x = renderable['render_info']['x']
             ..y = renderable['render_info']['y']
             ..rotation = renderable['render_info']['rotation'];
+
+          print(e.rotation);
           newEntities[renderable['id']] = e;
         }
 
