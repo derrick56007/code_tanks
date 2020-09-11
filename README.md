@@ -35,8 +35,10 @@ Start servers
 ```
 dart bin/run_all_servers_test.dart
 ```
-cd website/
-webdev serve
+
+Serve web files
+```
+cd website && webdev serve
 ```
 ## Features and bugs
 
