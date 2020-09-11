@@ -370,6 +370,9 @@ class AuthenticationServer extends BaseServer {
       return onInvalidDataError(socket);
     }
 
+    // alert client of build initialization
+    socket.send('log', {'line': 'Initializing build...'});
+
     await attemptBuildCode(codeLang, code, onBuildSuccess: (tankId) async {
       const msg = {'success': true};
 
@@ -383,6 +386,9 @@ class AuthenticationServer extends BaseServer {
       } else {
         print('error saving custom tank');
       }
+
+      // alert client of build success
+      socket.send('log', {'line': '$tankName successfully built'});
     }, onAlreadyBuilt: (tankId) async {
       const msg = {'success': true};
 
@@ -390,9 +396,7 @@ class AuthenticationServer extends BaseServer {
       print('tank already built');
       await authDb.saveTankIdForUser(userId, tankName, tankId);
 
-      const l = {'line': 'tank already built'};
-
-      socket.send('log', l);
+      socket.send('log', {'line': '$tankName already built'});
     }, onBuildError: () {
       socket.send('build_done', failMsg);
     }, onLog: (line) {
