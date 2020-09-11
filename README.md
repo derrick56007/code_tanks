@@ -21,6 +21,7 @@ Activate dart webdev
 ```
 pub global activate webdev
 ```
+Then add to [your PATH](https://dart.dev/tools/pub/cmd/pub-global#running-a-script-from-your-path) 
 
 ## Usage
 
