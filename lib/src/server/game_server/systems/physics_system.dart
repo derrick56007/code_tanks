@@ -12,7 +12,7 @@ import '../../server_utils/angle.dart';
 import '../../../../code_tanks_entity_component_system.dart';
 
 class PhysicsSystem extends System {
-  static const maxAngularVelocity = pi / 8;
+  static const maxAngularVelocity = pi / 32;
 
   final tree = KDTree();
 
@@ -37,8 +37,8 @@ class PhysicsSystem extends System {
     final rotationDelta = physComp.angularVelocity;
 
     physComp
-      ..position.features[0] += physComp.velocity * sin(physComp.rotation.toDegrees())
-      ..position.features[1] += physComp.velocity * cos(physComp.rotation.toDegrees())
+      ..position.features[0] += physComp.velocity * -sin(physComp.rotation)
+      ..position.features[1] += physComp.velocity * cos(physComp.rotation)
       ..rotation = (physComp.rotation + rotationDelta) % tau
       // ..velocity *= velocityDampeningRate
       // ..angularVelocity *= angularVelocityDampeningRate;
@@ -57,7 +57,7 @@ class PhysicsSystem extends System {
         // ..gunAngularVelocity *= angularVelocityDampeningRate
         // ..radarAngularVelocity *= angularVelocityDampeningRate;
         ..gunAngularVelocity *= 0
-        ..radarAngularVelocity *= 0;        
+        ..radarAngularVelocity *= 0;
 
       if (tankComp.gunRotatesWithTank) {
         tankComp.gunRotation = (tankComp.gunRotation + rotationDelta) % tau;
