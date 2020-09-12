@@ -37,7 +37,7 @@ class Game {
       ..addSystem(RenderSystem())
       ..addSystem(RunGameCommandSystem())
       ..addSystem(ApplyGameCommandSystem())
-      ..addSystem(PhysicsSystem())      
+      ..addSystem(PhysicsSystem())
       ..addSystem(ScannerSystem())
       ..addSystem(GameEventSystem());
   }
@@ -46,7 +46,9 @@ class Game {
 
   void initializeTank(String gameKey) {
     // TODO randomize position
-    final position = Vector2D()..features[0] = count * 10;
+    final position = Vector2D()
+      ..features[0] = count * 50
+      ..features[1] = count * 50;
     final tankRect = CTRect(10, 10);
 
     count++;

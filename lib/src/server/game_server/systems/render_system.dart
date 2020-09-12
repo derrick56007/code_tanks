@@ -59,7 +59,7 @@ class Renderable {
 
   Map toMap() => {
         'id': id,
-        'render_type': renderType.index,
+        'render_type_index': renderType.index,
         'render_info': renderInfo,
       };
 }

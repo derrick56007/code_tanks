@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:html';
 
+import 'package:code_tanks/code_tanks_common.dart';
 import 'package:quiver/async.dart';
 
 import '../state.dart';
@@ -56,39 +57,60 @@ class ViewState extends State {
       newEntities.clear();
 
       for (final renderable in frame) {
+        final renderType = RenderType.values[renderable['render_type_index']];
+
         if (!entitySet.contains(renderable['id'])) {
-          // create new
+          // create new entity
+
           newEntitySet.add(renderable['id']);
 
-          // TODO initialize different render_type
+          final bitmapContainer = BitmapContainer();
 
-          final barrel = Bitmap(textureAtlas.getBitmapData('barrelBlack_side.png'));
-          barrel
+          switch (renderType) {
+            case RenderType.tank:
+              final tankBodyBitmap = Bitmap(textureAtlas.getBitmapData('tankBody_dark_outline.png'));
+              tankBodyBitmap
+                ..pivotX = tankBodyBitmap.width / 2
+                ..pivotY = tankBodyBitmap.height / 2;
+
+              bitmapContainer.addChild(tankBodyBitmap);
+
+              final tankBarrelBitmap = Bitmap(textureAtlas.getBitmapData('tankDark_barrel2_outline.png'));
+              tankBarrelBitmap
+                ..pivotX = tankBarrelBitmap.width / 2
+                ..pivotY = tankBarrelBitmap.width / 2;
+
+              bitmapContainer.addChild(tankBarrelBitmap);
+
+              // TODO add radar bitmap
+
+              break;
+            case RenderType.bullet:
+              // TODO get bullet bitmap
+              break;
+            default:
+          }
+
+          bitmapContainer
             ..x = renderable['render_info']['x']
             ..y = renderable['render_info']['y']
-            ..rotation = renderable['render_info']['rotation']
-            ..pivotX = barrel.width / 2
-            ..pivotY = barrel.height / 2;
+            ..rotation = renderable['render_info']['rotation'];
 
-          print('new');
-          print(renderable);
+          stage.addChild(bitmapContainer);
 
-          stage.addChild(barrel);
-
-          newEntities[renderable['id']] = barrel;
+          newEntities[renderable['id']] = bitmapContainer;
         } else {
           // update
           // print('update ${renderable['id']}');
 
           // TODO update different render_type
-          final e = entities[renderable['id']];
-          e
+          final bitmapContainer = entities[renderable['id']];
+          bitmapContainer
             ..x = renderable['render_info']['x']
             ..y = renderable['render_info']['y']
             ..rotation = renderable['render_info']['rotation'];
 
-          print(e.rotation);
-          newEntities[renderable['id']] = e;
+          newEntities[renderable['id']] = bitmapContainer;
         }
 
         newEntitySet.add(renderable['id']);
