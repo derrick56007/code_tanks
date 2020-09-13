@@ -25,11 +25,11 @@ class ViewState extends State {
 
   ViewState() : super(querySelector('#view-state'));
 
-  final entities = {};
+  final entities = <int, BitmapContainer>{};
   final entitySet = <int>{};
 
   final newEntitySet = <int>{};
-  final newEntities = {};
+  final newEntities = <int, BitmapContainer>{};
 
   void onRunGameResponse(data) async {
     stateManager.pushState('view');
@@ -105,6 +105,28 @@ class ViewState extends State {
 
           // TODO update different render_type
           final bitmapContainer = entities[renderable['id']];
+
+          switch (renderType) {
+            case RenderType.tank:
+              // const tankBodyIndex = 0;
+              const tankBarrelIndex = 1;
+              const tankRadarIndex = 2;
+
+              bitmapContainer //
+                    ..children[tankBarrelIndex].rotation = renderable['render_info']['gun_rotation']
+                  //  ..children[tankRadarIndex].rotation = renderable['render_info']['radar_rotation'];
+
+                  ;
+
+              // TODO add radar bitmap
+
+              break;
+            case RenderType.bullet:
+              // TODO get bullet bitmap
+              break;
+            default:
+          }
+
           bitmapContainer
             ..x = renderable['render_info']['x']
             ..y = renderable['render_info']['y']

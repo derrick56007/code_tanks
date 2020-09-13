@@ -31,7 +31,7 @@ class ApplyGameCommandSystem extends System {
           break;
         case GameCommandName.rotateRadarBy:
           tankComp.radarAngularVelocity = command.val;
-          break;          
+          break;
         case GameCommandName.setRadarToRotateWithGun:
           tankComp.radarRotatesWithGun = command.val;
           break;

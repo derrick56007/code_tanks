@@ -12,7 +12,7 @@ import '../../server_utils/angle.dart';
 import '../../../../code_tanks_entity_component_system.dart';
 
 class PhysicsSystem extends System {
-  static const maxAngularVelocity = pi / 32;
+  static const maxAngularVelocity = pi / 64;
 
   final tree = KDTree();
 

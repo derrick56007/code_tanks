@@ -30,8 +30,10 @@ class RenderSystem extends System {
       renderInfo['rotation'] = physComp.rotation;
 
       TankUtilitiesComponent tankUtilsComp = entity.getComponent(TankUtilitiesComponent);
-      renderInfo['gun_rotation'] = tankUtilsComp.gunRotation;
-      renderInfo['radar_rotation'] = tankUtilsComp.radarRotation;
+
+      // TODO check rotations
+      renderInfo['gun_rotation'] = tankUtilsComp.gunRotation - physComp.rotation;
+      renderInfo['radar_rotation'] = tankUtilsComp.radarRotation - physComp.rotation;
     } else if (renderComp.renderType == RenderType.bullet) {
       PhysicsComponent physComp = entity.getComponent(PhysicsComponent);
 
