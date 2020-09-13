@@ -14,13 +14,14 @@ class ViewState extends State {
   final ButtonElement closeViewBtn = querySelector('#close-view-btn');
 
   final options = StageOptions()
-    ..backgroundColor = Color.Black
+    ..backgroundColor = Color.LightSteelBlue
     ..transparent = true
     ..renderEngine = RenderEngine.WebGL;
 
   final canvas = querySelector('#stage');
   Stage stage;
 
+  final resourceManager = ResourceManager();
   TextureAtlas textureAtlas;
 
   ViewState() : super(querySelector('#view-state'));
@@ -43,8 +44,10 @@ class ViewState extends State {
       print(stage.width);
       print(stage.height);
 
-      final resourceManager = ResourceManager();
-      resourceManager.addTextureAtlas('spritesheet', '/images/allSprites_retina.xml', TextureAtlasFormat.STARLINGXML);
+      resourceManager
+        ..addTextureAtlas('spritesheet', '/images/allSprites_retina.xml', TextureAtlasFormat.STARLINGXML)
+        ..addBitmapData('radar', '/images/radar.png');
+
       await resourceManager.load();
 
       textureAtlas = resourceManager.getTextureAtlas('spritesheet');
@@ -82,8 +85,12 @@ class ViewState extends State {
 
               bitmapContainer.addChild(tankBarrelBitmap);
 
-              // TODO add radar bitmap
+              final tankRadarBitmap = Bitmap(resourceManager.getBitmapData('radar'));
+              tankRadarBitmap
+                ..alpha = 0.5 // TODO remove this
+                ..pivotX = tankRadarBitmap.width / 2;
 
+              bitmapContainer.addChild(tankRadarBitmap);
               break;
             case RenderType.bullet:
               // TODO get bullet bitmap
@@ -101,9 +108,7 @@ class ViewState extends State {
           newEntities[renderable['id']] = bitmapContainer;
         } else {
           // update
-          // print('update ${renderable['id']}');
 
-          // TODO update different render_type
           final bitmapContainer = entities[renderable['id']];
 
           switch (renderType) {
@@ -112,17 +117,13 @@ class ViewState extends State {
               const tankBarrelIndex = 1;
               const tankRadarIndex = 2;
 
-              bitmapContainer //
-                    ..children[tankBarrelIndex].rotation = renderable['render_info']['gun_rotation']
-                  //  ..children[tankRadarIndex].rotation = renderable['render_info']['radar_rotation'];
-
-                  ;
-
-              // TODO add radar bitmap
+              bitmapContainer
+                ..children[tankBarrelIndex].rotation = renderable['render_info']['gun_rotation']
+                ..children[tankRadarIndex].rotation = renderable['render_info']['radar_rotation'];
 
               break;
             case RenderType.bullet:
-              // TODO get bullet bitmap
+              // TODO update bullet bitmap
               break;
             default:
           }
