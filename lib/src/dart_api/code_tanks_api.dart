@@ -33,18 +33,18 @@ abstract class BaseTank {
 
   void setRotateTankBy(int amount) {
     _createAndAddCommandWithArgument('set_rotate_tank_by', amount);
-  }  
+  }
 
   void rotateGunBy(int amount) {
     _createAndAddCommandWithArgument('rotate_gun_by', amount);
-  }  
+  }
 
   void setRotateGunBy(int amount) {
     _createAndAddCommandWithArgument('set_rotate_gun_by', amount);
   }
 
-  void rotateRadar(int amount) {
-    _createAndAddCommandWithArgument('rotate_radar', amount);
+  void rotateRadarBy(int amount) {
+    _createAndAddCommandWithArgument('rotate_radar_by', amount);
   }
 
   void setRotateRadarBy(int amount) {
@@ -65,10 +65,10 @@ abstract class BaseTank {
 
   void setFireWithPower(int power) {
     _createAndAddCommandWithArgument('set_fire_with_power', power);
-  }  
+  }
 
   void _createAndAddCommandWithArgument(String commandType, dynamic commandArg) {
-     currentCommands.add({'command_type': commandType, 'command_arg': commandArg});
+    currentCommands.add({'command_type': commandType, 'command_arg': commandArg});
   }
 }
 
@@ -83,5 +83,5 @@ class ScanTankEvent extends GameEvent {
 class HitByBulletEvent extends GameEvent {
   HitByBulletEvent.internal();
 
-  factory HitByBulletEvent.fromMap(Map map) => HitByBulletEvent.internal();  
+  factory HitByBulletEvent.fromMap(Map map) => HitByBulletEvent.internal();
 }

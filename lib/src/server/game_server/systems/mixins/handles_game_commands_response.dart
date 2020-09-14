@@ -1,11 +1,9 @@
-
 import '../../components/game_command/game_command.dart';
 import '../../components/game_command/game_commands_component.dart';
 
 import '../../../../../code_tanks_entity_component_system.dart';
 
 mixin HandlesGameCommandsResponse on System {
-
   void onGameCommandsResponse(dynamic data, Entity entity) {
     // print('received update response');
     // TODO validate data
@@ -29,12 +27,17 @@ mixin HandlesGameCommandsResponse on System {
       // TODO catch errors
 
       final generatedCommands = GameCommand.commandsfromStringWithVal(commandType, commandArg);
+      if (generatedCommands.isEmpty) {
+        print('error: no generated commands');
+      }
+      print(generatedCommands);
+
       for (final generatedCommand in generatedCommands) {
         generatedCommand.commandDepth = depth;
       }
 
       // count += generatedCommands.length;
-      
+
       gameCommandsComponent.commandQueue.addAllCommands(generatedCommands);
     }
 

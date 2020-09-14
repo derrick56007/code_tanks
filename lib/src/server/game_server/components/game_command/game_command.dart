@@ -1,4 +1,3 @@
-
 import '../../systems/physics_system.dart';
 
 import '../../../server_utils/angle.dart';
@@ -139,8 +138,13 @@ class GameCommand {
     return [GameCommand(GameCommandName.fireWithPower, val: 1, isEndOfTurnCommand: true)];
   }
 
-  static List<GameCommand> commandsfromStringWithVal(String str, val) =>
-      _playerCommandStringToGameCommandGenerator[str](val);
+  static List<GameCommand> commandsfromStringWithVal(String str, val) {
+    if (!_playerCommandStringToGameCommandGenerator.containsKey(str)) {
+      return [];
+    }
+
+    return _playerCommandStringToGameCommandGenerator[str](val);
+  }
 
   @override
   String toString() => name.toString();
