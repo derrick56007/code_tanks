@@ -11,3 +11,4 @@ dependencies:
     # path: ../../    
     git:
       url: https://github.com/Derrick56007/code_tanks.git
+    version: ^0.0.1

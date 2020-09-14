@@ -30,7 +30,6 @@ mixin HandlesGameCommandsResponse on System {
       if (generatedCommands.isEmpty) {
         print('error: no generated commands');
       }
-      print(generatedCommands);
 
       for (final generatedCommand in generatedCommands) {
         generatedCommand.commandDepth = depth;
