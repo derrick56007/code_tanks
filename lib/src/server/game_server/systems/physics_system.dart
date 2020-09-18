@@ -25,6 +25,8 @@ class PhysicsSystem extends System {
   final velocityDampeningRate = 0.5;
   final angularVelocityDampeningRate = 0.5;
 
+  int currentCollisionStep = -1;
+
   PhysicsSystem() : super({PhysicsComponent, ColliderComponent});
 
   @override
@@ -77,8 +79,6 @@ class PhysicsSystem extends System {
     positionsToEntity[physComp.position] = entity;
   }
 
-  int currentCollisionStep = -1;
-
   @override
   Future<void> postProcess() async {
     tree.build(positions);
@@ -101,17 +101,16 @@ class PhysicsSystem extends System {
         Tuple(yStart, yEnd),
       ];
 
+      if (collComp1.collisionStep != currentCollisionStep) {
+        collComp1
+          ..collisionStep = currentCollisionStep
+          ..collisionIds.clear();
+      }
+
       for (final p2 in tree.rangeSearch(queryRegions)) {
         final e2 = positionsToEntity[p2];
 
-        PhysicsComponent physComp2 = e2.getComponent(PhysicsComponent);
         ColliderComponent collComp2 = e2.getComponent(ColliderComponent);
-
-        if (collComp1.collisionStep != currentCollisionStep) {
-          collComp1
-            ..collisionStep = currentCollisionStep
-            ..collisionIds.clear();
-        }
 
         if (collComp2.collisionStep != currentCollisionStep) {
           collComp2
@@ -128,6 +127,8 @@ class PhysicsSystem extends System {
         if (!collComp1.collidesWith(collComp2) || e1.id == e2.id) {
           continue;
         }
+
+        PhysicsComponent physComp2 = e2.getComponent(PhysicsComponent);
 
         // check shape collision
         if (!doesCollide(physComp1, collComp1, physComp2, collComp2)) {
