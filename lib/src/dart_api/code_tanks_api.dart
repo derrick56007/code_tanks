@@ -1,3 +1,5 @@
+import 'package:code_tanks/src/server/game_server/game.dart';
+
 abstract class BaseTank {
   final currentCommands = <Map>[];
 
@@ -5,7 +7,7 @@ abstract class BaseTank {
 
   void onScanTank(ScanTankEvent e) {}
 
-  void onHitByBulletEvent(HitByBulletEvent e) {}
+  void onCollisionEvent(CollisionEvent e) {}
 
   void aheadBy(int amount) {
     _createAndAddCommandWithArgument('ahead_by', amount);
@@ -72,16 +74,22 @@ abstract class BaseTank {
   }
 }
 
-abstract class GameEvent {}
+// enum GameEventType { scan, collision }
 
-class ScanTankEvent extends GameEvent {
-  ScanTankEvent.internal();
+class GameEvent {
+  final String eventName;
 
-  factory ScanTankEvent.fromMap(Map map) => ScanTankEvent.internal();
+  final Map info;
+
+  GameEvent(this.eventName, this.info);
+
+  Map toJson() => {'event_name': eventName, 'info': info};
 }
 
-class HitByBulletEvent extends GameEvent {
-  HitByBulletEvent.internal();
+class ScanTankEvent extends GameEvent {
+  ScanTankEvent(Map info) : super('scan_tank_event', info);
+}
 
-  factory HitByBulletEvent.fromMap(Map map) => HitByBulletEvent.internal();
+class CollisionEvent extends GameEvent {
+  CollisionEvent(Map info) : super('collision_event', info);
 }

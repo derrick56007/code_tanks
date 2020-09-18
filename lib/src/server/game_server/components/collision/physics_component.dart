@@ -9,4 +9,7 @@ class PhysicsComponent extends Component {
   num angularVelocity = 0;
 
   PhysicsComponent(this.position);
+
+  @override
+  String toString() => 'pos: $position, vel: $velocity, rot: $rotation, angV: $angularVelocity';
 }

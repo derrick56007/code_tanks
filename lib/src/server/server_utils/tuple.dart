@@ -1,4 +1,4 @@
-class Tuple<T,A> {
+class Tuple<T, A> {
   T first;
   A second;
 
@@ -7,5 +7,5 @@ class Tuple<T,A> {
   @override
   String toString() => '($first, $second)';
 
-  Tuple<T,A> copy() => Tuple<T,A>(first, second);
+  Tuple<T, A> copy() => Tuple<T, A>(first, second);
 }

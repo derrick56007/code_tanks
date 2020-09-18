@@ -1,4 +1,5 @@
 import 'package:code_tanks/code_tanks_common.dart';
+import 'package:code_tanks/code_tanks_kdtree.dart';
 import 'package:code_tanks/src/server/game_server/components/collision/collider_component.dart';
 
 import '../../../code_tanks_entity_component_system.dart';
@@ -6,7 +7,7 @@ import '../../../code_tanks_entity_component_system.dart';
 import 'components/collision/health_component.dart';
 import '../server_utils/vector_2d.dart';
 import 'components/game_command/game_commands_component.dart';
-import 'components/game_event/game_event_component.dart';
+import 'components/game_event_component.dart';
 import 'components/render_component.dart';
 import 'components/scanner_component.dart';
 import 'components/socket_component.dart';
@@ -40,6 +41,39 @@ class Game {
       ..addSystem(PhysicsSystem())
       ..addSystem(ScannerSystem())
       ..addSystem(GameEventSystem());
+
+    // set up walls
+
+    const worldWidth = 300;
+    const worldHeight = 300;
+
+    final wallShapes = <CTRect>[
+      CTRect(worldWidth, 1), // top wall
+      CTRect(worldWidth, 1), // bot wall
+      CTRect(1, worldHeight), // left wall
+      CTRect(1, worldHeight) // right wall
+    ];
+
+    final wallPositions = <Vector2D>[
+      Vector2D() // top wall
+        ..features[0] = 0
+        ..features[1] = 0,
+      Vector2D() // bot wall
+        ..features[0] = 0
+        ..features[1] = worldHeight,
+      Vector2D() // left wall
+        ..features[0] = 0
+        ..features[1] = 0,
+      Vector2D() // right wall
+        ..features[0] = worldWidth
+        ..features[1] = 0
+    ];
+
+    for (var i = 0; i < 4; i++) {
+      world.createEntity()
+        ..addComponent(PhysicsComponent(wallPositions[i]))
+        ..addComponent(ColliderComponent(wallShapes[i], CollisionMask.wall, CollisionMask.none));
+    }
   }
 
   int count = 1;
@@ -49,15 +83,18 @@ class Game {
     final position = Vector2D()
       ..features[0] = count * 50
       ..features[1] = count * 50;
-    final tankRect = CTRect(10, 10);
+
+    final tankShape = CTCircle(40);
 
     count++;
+
+    final tankCollisionBitMask = CollisionMask.tank | CollisionMask.bullet | CollisionMask.wall;
 
     final entity = world.createEntity()
       ..addComponent(RenderComponent(RenderType.tank))
       ..addComponent(HealthComponent())
       ..addComponent(PhysicsComponent(position))
-      ..addComponent(ColliderComponent(tankRect))
+      ..addComponent(ColliderComponent(tankShape, CollisionMask.tank, tankCollisionBitMask))
       ..addComponent(GameCommandsComponent())
       ..addComponent(ScannerComponent())
       ..addComponent(GameEventComponent())
@@ -66,7 +103,9 @@ class Game {
     gameKeyToEntityId[gameKey] = entity.id;
   }
 
-  void onTankDisconnect(String gameKey) {}
+  void onTankDisconnect(String gameKey) {
+    print('tank disconnected');
+  }
 
   void addTank(String gameKey, CommonWebSocket socket) {
     if (!isValidGameKey(gameKey)) {

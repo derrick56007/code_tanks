@@ -4,16 +4,16 @@ import 'component.dart';
 class Entity {
   final int id;
   final World world;
-  final componentTypeToComponent = <Type, Component>{};
+  final _componentTypeToComponent = <Type, Component>{};
 
   Entity(this.id, this.world);
 
   void addComponent(Component component) {
     world.addComponentWithEntityId(component.runtimeType, id);
-    componentTypeToComponent[component.runtimeType] = component;
+    _componentTypeToComponent[component.runtimeType] = component;
   }
 
   void addAll(Iterable<Component> components) => components.forEach((component) => addComponent);
 
-  Component getComponent(Type componentType) => componentTypeToComponent[componentType];
+  Component getComponent(Type componentType) => _componentTypeToComponent[componentType];
 }

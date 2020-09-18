@@ -23,8 +23,8 @@ void run(BaseTank bot) async {
 }
 
 final nameToEventGenerator = <String, GameEvent Function(Map)>{
-  'scan_tank_event': (Map map) => ScanTankEvent.fromMap(map),
-  'hit_by_bullet_event': (Map map) => HitByBulletEvent.fromMap(map),
+  'scan_tank_event': (Map info) => ScanTankEvent(info),
+  'collision_event': (Map info) => CollisionEvent(info),
 };
 
 void handleSocketAndBot(socket, BaseTank bot) {
@@ -37,22 +37,16 @@ void handleSocketAndBot(socket, BaseTank bot) {
   }
 
   void onRunGameCommandsRequest(_) {
-    // print('received run_game_commands_request');
     bot.run();
     sendAndClearCommands('run_game_commands_response');
   }
 
   final dispatchToRespectiveEventHandler = <Type, Function>{
     ScanTankEvent: (ScanTankEvent e) => bot.onScanTank(e),
-    HitByBulletEvent: (HitByBulletEvent e) => bot.onHitByBulletEvent(e)
+    CollisionEvent: (CollisionEvent e) => bot.onCollisionEvent(e)
   };
 
   void onEventCommandsRequest(data) {
-    print('received event_commands_request');
-
-    print(data);
-
-    // TODO validate data
     final eventName = data['event_name'];
     final gameEvent = nameToEventGenerator[eventName](data);
 
