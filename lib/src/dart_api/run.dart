@@ -33,7 +33,7 @@ void handleSocketAndBot(socket, BaseTank bot) {
     socket.send(msgType, msg);
     bot.currentCommands.clear();
 
-    print('sent commands');
+    // print('sent commands');
   }
 
   void onRunGameCommandsRequest(_) {

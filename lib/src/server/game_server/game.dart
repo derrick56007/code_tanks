@@ -128,7 +128,7 @@ class Game {
     print('started simulation');
 
     for (var i = 0; i < 1000; i++) {
-      print('update $i');
+      // print('update $i');
       await world.updateAsync();
     }
 

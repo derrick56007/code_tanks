@@ -62,6 +62,28 @@ class ScannerSystem extends System {
           ..scanIds.clear();
       }
 
+      final topVertexTranslated = Vector2D()
+        ..features[0] = ScannerComponent.radarVertices[0].features[0] + physComp1.position.features[0]
+        ..features[1] = ScannerComponent.radarVertices[0].features[1] + physComp1.position.features[1];
+
+      final leftVertexTranslated = Vector2D()
+        ..features[0] = ScannerComponent.radarVertices[1].features[0] * cos(physComp1.rotation) -
+            ScannerComponent.radarVertices[1].features[1] * sin(physComp1.rotation) +
+            physComp1.position.features[0]
+        ..features[1] = ScannerComponent.radarVertices[1].features[1] * cos(physComp1.rotation) +
+            ScannerComponent.radarVertices[1].features[0] * sin(physComp1.rotation) +
+            physComp1.position.features[1];
+
+      final rightVertexTranslated = Vector2D()
+        ..features[0] = ScannerComponent.radarVertices[2].features[0] * cos(physComp1.rotation) -
+            ScannerComponent.radarVertices[2].features[1] * sin(physComp1.rotation) +
+            physComp1.position.features[0]
+        ..features[1] = ScannerComponent.radarVertices[2].features[1] * cos(physComp1.rotation) +
+            ScannerComponent.radarVertices[2].features[0] * sin(physComp1.rotation) +
+            physComp1.position.features[1];
+
+      final triangle = [topVertexTranslated, leftVertexTranslated, rightVertexTranslated];
+
       for (final p2 in tree.rangeSearch(queryRegions)) {
         final e2 = positionsToEntity[p2];
 
@@ -72,41 +94,26 @@ class ScannerSystem extends System {
         PhysicsComponent physComp2 = e2.getComponent(PhysicsComponent);
         ColliderComponent collComp2 = e2.getComponent(ColliderComponent);
 
-        final topVertexTranslated = Vector2D()
-          ..features[0] = ScannerComponent.radarVertices[0].features[0] + physComp1.position.features[0]
-          ..features[1] = ScannerComponent.radarVertices[0].features[1] + physComp1.position.features[1];
+        if (!triangleCircleCollision(triangle, physComp2.position, collComp2.shape.getMaxDiameter())) {
+          continue;
+        }
 
-        final leftVertexTranslated = Vector2D()
-          ..features[0] = ScannerComponent.radarVertices[1].features[0] * cos(physComp1.rotation) -
-              ScannerComponent.radarVertices[1].features[1] * sin(physComp1.rotation) +
-              physComp1.position.features[0]
-          ..features[1] = ScannerComponent.radarVertices[1].features[1] * cos(physComp1.rotation) +
-              ScannerComponent.radarVertices[1].features[0] * sin(physComp1.rotation) +
-              physComp1.position.features[1];
+        final info = {
+          'name': CollisionMask.nameOf(collComp2.categoryBitMask),
+          'position': [physComp2.position.features[0], physComp2.position.features[1]],
+          'rotation': physComp2.rotation,
+          'velocity': physComp2.velocity,
+        };
 
-        final rightVertexTranslated = Vector2D()
-          ..features[0] = ScannerComponent.radarVertices[2].features[0] * cos(physComp1.rotation) -
-              ScannerComponent.radarVertices[2].features[1] * sin(physComp1.rotation) +
-              physComp1.position.features[0]
-          ..features[1] = ScannerComponent.radarVertices[2].features[1] * cos(physComp1.rotation) +
-              ScannerComponent.radarVertices[2].features[0] * sin(physComp1.rotation) +
-              physComp1.position.features[1];
+        print('scan ${e1.id} -> ${e2.id}');
 
-        final triangle = [topVertexTranslated, leftVertexTranslated, rightVertexTranslated];
+        // alert entity1 of collision event if entity1 has GameEventComponent
+        GameEventComponent gameEventComponent1 = e1.getComponent(GameEventComponent);
+        gameEventComponent1?.gameEvents?.add(ScanTankEvent(info));
 
-        if (triangleCircleCollision(triangle, physComp2.position, collComp2.shape.getMaxDiameter())) {
-          final info = {
-            'name': CollisionMask.nameOf(collComp2.categoryBitMask),
-            'position': [physComp2.position.features[0], physComp2.position.features[1]],
-            'rotation': physComp2.rotation,
-            'velocity': physComp2.velocity,
-          };
-
-          print('scan ${e1.id} -> ${e2.id}');
-
-          // alert entity1 of collision event if entity1 has GameEventComponent
-          GameEventComponent gameEventComponent1 = e1.getComponent(GameEventComponent);
-          gameEventComponent1?.gameEvents?.add(ScanTankEvent(info));
+        // save respective collisions
+        if (!scannerComp.scanIds.contains(e2.id)) {
+          scannerComp.scanIds..add(e2.id);
         }
       }
     }
