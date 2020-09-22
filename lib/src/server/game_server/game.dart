@@ -76,13 +76,13 @@ class Game {
     }
   }
 
-  int count = 1;
+  int count = 0;
 
   void initializeTank(String gameKey) {
     // TODO randomize position
     final position = Vector2D()
-      ..features[0] = count * 50
-      ..features[1] = count * 50;
+      ..features[0] = count * 300 + 90
+      ..features[1] = count * 300 + 90;
 
     final tankShape = CTCircle(40);
 

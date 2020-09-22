@@ -22,5 +22,7 @@ class GameEventSystem extends System with HandlesGameCommandsResponse {
       socketComponent.socket.send('event_commands_request', gameEvent.toJson());
       await updateDone;
     }
+
+    gameEventComponent.gameEvents.clear();
   }
 }

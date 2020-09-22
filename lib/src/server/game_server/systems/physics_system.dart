@@ -110,6 +110,10 @@ class PhysicsSystem extends System {
       for (final p2 in tree.rangeSearch(queryRegions)) {
         final e2 = positionsToEntity[p2];
 
+        if (e1.id == e2.id) {
+          continue;
+        }
+
         ColliderComponent collComp2 = e2.getComponent(ColliderComponent);
 
         if (collComp2.collisionStep != currentCollisionStep) {
@@ -124,7 +128,7 @@ class PhysicsSystem extends System {
         }
 
         // check if collision is possible
-        if (!collComp1.collidesWith(collComp2) || e1.id == e2.id) {
+        if (!collComp1.collidesWith(collComp2)) {
           continue;
         }
 
@@ -136,7 +140,7 @@ class PhysicsSystem extends System {
         }
 
         print('collision ${e1.id} -> ${e2.id}');
-        print('($physComp1, $collComp1) -> ($physComp2, $collComp2)');
+        // print('($physComp1, $collComp1) -> ($physComp2, $collComp2)');
 
         // alert entity1 of collision event if entity1 has GameEventComponent
         GameEventComponent gameEventComponent1 = e1.getComponent(GameEventComponent);

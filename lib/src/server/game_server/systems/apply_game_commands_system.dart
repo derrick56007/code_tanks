@@ -39,10 +39,12 @@ class ApplyGameCommandSystem extends System {
           tankComp.gunRotatesWithTank = command.val;
           break;
         case GameCommandName.fireWithPower:
-          // TODO
+          // TODO implement
           break;
         case GameCommandName.requestInfo:
-          // TODO
+          // TODO implement
+          break;
+        case GameCommandName.pause:
           break;
         default:
           throw UnimplementedError('no implementation for command $command');

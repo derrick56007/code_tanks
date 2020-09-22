@@ -69,6 +69,10 @@ abstract class BaseTank {
     _createAndAddCommandWithArgument('set_fire_with_power', power);
   }
 
+  void pause(int count) {
+    _createAndAddCommandWithArgument('pause', count);
+  }
+
   void _createAndAddCommandWithArgument(String commandType, dynamic commandArg) {
     currentCommands.add({'command_type': commandType, 'command_arg': commandArg});
   }

@@ -9,5 +9,6 @@ enum GameCommandName {
   setGunToRotateWithTank,
 
   fireWithPower,
-  requestInfo
+  requestInfo,
+  pause,
 }

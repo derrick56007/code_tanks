@@ -1,7 +1,9 @@
 import 'dart:math';
 
+import 'package:code_tanks/code_tanks_dart_api.dart';
 import 'package:code_tanks/src/server/game_server/components/collision/collider_component.dart';
 import 'package:code_tanks/src/server/game_server/components/collision/physics_component.dart';
+import 'package:code_tanks/src/server/game_server/components/game_event_component.dart';
 
 import '../../../../code_tanks_kdtree.dart';
 import '../components/scanner_component.dart';
@@ -63,6 +65,10 @@ class ScannerSystem extends System {
       for (final p2 in tree.rangeSearch(queryRegions)) {
         final e2 = positionsToEntity[p2];
 
+        if (e1.id == e2.id) {
+          continue;
+        }
+
         PhysicsComponent physComp2 = e2.getComponent(PhysicsComponent);
         ColliderComponent collComp2 = e2.getComponent(ColliderComponent);
 
@@ -85,6 +91,23 @@ class ScannerSystem extends System {
           ..features[1] = ScannerComponent.radarVertices[2].features[1] * cos(physComp1.rotation) +
               ScannerComponent.radarVertices[2].features[0] * sin(physComp1.rotation) +
               physComp1.position.features[1];
+
+        final triangle = [topVertexTranslated, leftVertexTranslated, rightVertexTranslated];
+
+        if (triangleCircleCollision(triangle, physComp2.position, collComp2.shape.getMaxDiameter())) {
+          final info = {
+            'name': CollisionMask.nameOf(collComp2.categoryBitMask),
+            'position': [physComp2.position.features[0], physComp2.position.features[1]],
+            'rotation': physComp2.rotation,
+            'velocity': physComp2.velocity,
+          };
+
+          print('scan ${e1.id} -> ${e2.id}');
+
+          // alert entity1 of collision event if entity1 has GameEventComponent
+          GameEventComponent gameEventComponent1 = e1.getComponent(GameEventComponent);
+          gameEventComponent1?.gameEvents?.add(ScanTankEvent(info));
+        }
       }
     }
   }

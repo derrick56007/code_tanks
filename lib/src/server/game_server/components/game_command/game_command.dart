@@ -43,7 +43,12 @@ class GameCommand {
     'request_info': requestInfo,
     'fire_with_power': fireWithPower,
     'set_fire_with_power': setFireWithPower,
+    'pause': pause
   };
+
+  static List<GameCommand> pause(int count) {
+    return List.generate(count, (_) => GameCommand(GameCommandName.pause, val: 1));
+  }
 
   static List<GameCommand> aheadBy(int val) {
     return List.generate(val.abs(), (_) => GameCommand(GameCommandName.aheadBy, val: 1));

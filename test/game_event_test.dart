@@ -20,6 +20,7 @@ class Custom extends BaseTank {
 
   @override
   void onScanTank(ScanTankEvent e) {
+    print('scan event');
     backBy(2);
     setRotateRadarBy(2);
 
