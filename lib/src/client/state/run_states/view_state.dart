@@ -36,7 +36,10 @@ class ViewState extends State {
     stateManager.pushState('view');
 
     if (stage == null) {
-      stage = Stage(canvas, width: 800, height: 600, options: options);
+      const width = 800;
+      const height = 600;
+
+      stage = Stage(canvas, width: width, height: height, options: options);
 
       final renderLoop = RenderLoop();
       renderLoop.addStage(stage);

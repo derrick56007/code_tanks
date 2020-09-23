@@ -139,7 +139,7 @@ class PhysicsSystem extends System {
           continue;
         }
 
-        print('collision ${e1.id} -> ${e2.id}');
+        // print('collision ${e1.id} -> ${e2.id}');
         // print('($physComp1, $collComp1) -> ($physComp2, $collComp2)');
 
         // alert entity1 of collision event if entity1 has GameEventComponent

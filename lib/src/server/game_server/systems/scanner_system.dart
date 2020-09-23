@@ -4,6 +4,7 @@ import 'package:code_tanks/code_tanks_dart_api.dart';
 import 'package:code_tanks/src/server/game_server/components/collision/collider_component.dart';
 import 'package:code_tanks/src/server/game_server/components/collision/physics_component.dart';
 import 'package:code_tanks/src/server/game_server/components/game_event_component.dart';
+import 'package:code_tanks/src/server/game_server/components/tank_utilities_component.dart';
 
 import '../../../../code_tanks_kdtree.dart';
 import '../components/scanner_component.dart';
@@ -11,7 +12,7 @@ import '../components/scanner_component.dart';
 import '../../../../code_tanks_entity_component_system.dart';
 
 class ScannerSystem extends System {
-  ScannerSystem() : super({ScannerComponent, PhysicsComponent, ColliderComponent});
+  ScannerSystem() : super({ScannerComponent, PhysicsComponent, ColliderComponent, TankUtilitiesComponent});
 
   final tree = KDTree();
 
@@ -45,6 +46,7 @@ class ScannerSystem extends System {
 
       PhysicsComponent physComp1 = e1.getComponent(PhysicsComponent);
       ScannerComponent scannerComp = e1.getComponent(ScannerComponent);
+      TankUtilitiesComponent tankComp = e1.getComponent(TankUtilitiesComponent);
 
       final xStart = physComp1.position.features[0] - ScannerComponent.maxDiameter;
       final xEnd = physComp1.position.features[0] + ScannerComponent.maxDiameter;
@@ -62,27 +64,31 @@ class ScannerSystem extends System {
           ..scanIds.clear();
       }
 
+      final radarRotation = tankComp.radarRotation - pi;
+
       final topVertexTranslated = Vector2D()
         ..features[0] = ScannerComponent.radarVertices[0].features[0] + physComp1.position.features[0]
         ..features[1] = ScannerComponent.radarVertices[0].features[1] + physComp1.position.features[1];
 
       final leftVertexTranslated = Vector2D()
-        ..features[0] = ScannerComponent.radarVertices[1].features[0] * cos(physComp1.rotation) -
-            ScannerComponent.radarVertices[1].features[1] * sin(physComp1.rotation) +
+        ..features[0] = ScannerComponent.radarVertices[1].features[0] * cos(radarRotation) -
+            ScannerComponent.radarVertices[1].features[1] * sin(radarRotation) +
             physComp1.position.features[0]
-        ..features[1] = ScannerComponent.radarVertices[1].features[1] * cos(physComp1.rotation) +
-            ScannerComponent.radarVertices[1].features[0] * sin(physComp1.rotation) +
+        ..features[1] = ScannerComponent.radarVertices[1].features[1] * cos(radarRotation) +
+            ScannerComponent.radarVertices[1].features[0] * sin(radarRotation) +
             physComp1.position.features[1];
 
       final rightVertexTranslated = Vector2D()
-        ..features[0] = ScannerComponent.radarVertices[2].features[0] * cos(physComp1.rotation) -
-            ScannerComponent.radarVertices[2].features[1] * sin(physComp1.rotation) +
+        ..features[0] = ScannerComponent.radarVertices[2].features[0] * cos(radarRotation) -
+            ScannerComponent.radarVertices[2].features[1] * sin(radarRotation) +
             physComp1.position.features[0]
-        ..features[1] = ScannerComponent.radarVertices[2].features[1] * cos(physComp1.rotation) +
-            ScannerComponent.radarVertices[2].features[0] * sin(physComp1.rotation) +
+        ..features[1] = ScannerComponent.radarVertices[2].features[1] * cos(radarRotation) +
+            ScannerComponent.radarVertices[2].features[0] * sin(radarRotation) +
             physComp1.position.features[1];
 
       final triangle = [topVertexTranslated, leftVertexTranslated, rightVertexTranslated];
+      // print('${e1.id} derp, ${triangle}');
+      // break;
 
       for (final p2 in tree.rangeSearch(queryRegions)) {
         final e2 = positionsToEntity[p2];
@@ -106,6 +112,8 @@ class ScannerSystem extends System {
         };
 
         print('scan ${e1.id} -> ${e2.id}');
+        print('radar rotation: ${radarRotation}');
+        print('${triangle} ${physComp2.position}, ${collComp2.shape.getMaxDiameter()}');
 
         // alert entity1 of collision event if entity1 has GameEventComponent
         GameEventComponent gameEventComponent1 = e1.getComponent(GameEventComponent);
@@ -113,7 +121,7 @@ class ScannerSystem extends System {
 
         // save respective collisions
         if (!scannerComp.scanIds.contains(e2.id)) {
-          scannerComp.scanIds..add(e2.id);
+          scannerComp.scanIds.add(e2.id);
         }
       }
     }

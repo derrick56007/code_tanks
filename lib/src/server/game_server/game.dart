@@ -78,11 +78,22 @@ class Game {
 
   int count = 0;
 
+  static const width = 800;
+  static const height = 600;
+
+  // TODO better position implementation
+  final positions = <Tuple<num, num>>[
+    Tuple(width / 4, height / 4),
+    Tuple(width * 3 / 4, height * 3 / 4),
+    Tuple(width / 4, height * 3 / 4),
+    Tuple(width * 3 / 4, height / 4),
+  ];
+
   void initializeTank(String gameKey) {
     // TODO randomize position
     final position = Vector2D()
-      ..features[0] = count * 300 + 90
-      ..features[1] = count * 300 + 90;
+      ..features[0] = positions[count].first
+      ..features[1] = positions[count].second;
 
     final tankShape = CTCircle(40);
 
