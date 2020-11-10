@@ -10,8 +10,7 @@ class NewTankState extends State {
 
   StreamSubscription codeLangSub;
 
-  NewTankState()
-      : super(querySelector('#new-tank-state'));
+  NewTankState() : super(querySelector('#new-tank-state'));
 
   bool validTankNameAndCodeLang(String name, String lang) => name.trim().isNotEmpty && lang.trim().isNotEmpty;
 
@@ -42,7 +41,7 @@ class NewTankState extends State {
 
   @override
   void init() {
-querySelector('#cancel-create-tank-btn').onClick.listen((_) {
+    querySelector('#cancel-create-tank-btn').onClick.listen((_) {
       hide();
     });
 
