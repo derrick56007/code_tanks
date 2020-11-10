@@ -52,7 +52,8 @@ dart bin/run_all_servers_test.dart
 
 Serve web files
 ```
-cd website && webdev serve
+cd website
+webdev serve
 ```
 ## Features and bugs
 
